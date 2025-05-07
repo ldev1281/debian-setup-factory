@@ -1,9 +1,12 @@
-name: Build Setup Scripts (latest release)
+name: Build Setup Scripts (tagged release)
 
 on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
 
 jobs:
   release:
@@ -33,15 +36,13 @@ jobs:
         run: |
           mkdir -p dist
           for recipe in recipes/*.recipe; do
-              bash builder/build.bash "$recipe" > "dist/$(basename "${recipe%.recipe}.bash")"
+            bash builder/build.bash "$recipe" > "dist/$(basename "${recipe%.recipe}.bash")"
           done
           cp VERSION dist/VERSION
 
-      - name: Create or update 'latest' release
+      - name: Create GitHub release for tag
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: latest
-          name: Latest Setup Scripts
+          tag_name: ${{ github.ref_name }}
+          name: Setup Scripts ${{ github.ref_name }}
           files: dist/*
-          draft: false
-          prerelease: false
