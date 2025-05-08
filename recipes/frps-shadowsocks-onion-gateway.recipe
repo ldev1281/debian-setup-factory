@@ -1,0 +1,15 @@
+
+@module shadowsocks-server.bash
+@module frp-server.bash
+
+
+echo
+echo "Server successfully configured"
+echo "----------------------------------------"
+#echo "Shadowsocks endpoint:    $TOR_ONION_HOSTNAME:$SS_PORT"
+echo "Shadowsocks password:    $SHADOWSOCKS_PASSWORD"
+echo "Encryption method:       $SHADOWSOCKS_METHOD"
+echo "----------------------------------------"
+#echo "FRP .onion endpoint:     $TOR_ONION_HOSTNAME:$FRP_PORT"
+echo "FRP token:               $FRP_TOKEN"
+echo "----------------------------------------"

@@ -1,4 +1,4 @@
-# shadowsocks setup module
+# shadowsocks server setup module
 
 @module logger.bash
 

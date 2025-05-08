@@ -104,7 +104,7 @@ logger::err "Something went wrong"
 
 <details>
 
-<summary>`setup-modules/shadowsocks.bash` — install and configure Shadowsocks</summary>
+<summary>setup-modules/shadowsocks-server.bash — install and configure Shadowsocks</summary>
 
 This module installs and configures a basic [shadowsocks-libev](https://github.com/shadowsocks/shadowsocks-libev) server.
 
@@ -146,7 +146,7 @@ If not set, the module will fall back to the defaults above.
 ### Example usage in a recipe
 
 ```bash
-@module shadowsocks.bash
+@module shadowsocks-server.bash
 ```
 
 You can override configuration by setting environment variables beforehand:
@@ -154,7 +154,7 @@ You can override configuration by setting environment variables beforehand:
 ```bash
 export SHADOWSOCKS_METHOD="chacha20-ietf-poly1305"
 export SHADOWSOCKS_PORT=8388
-@module shadowsocks.bash
+@module shadowsocks-server.bash
 ```
 
 ### Notes
@@ -168,7 +168,7 @@ export SHADOWSOCKS_PORT=8388
 
 <details>
 
-<summary>`setup-modules/frp-server.bash` — install and configure frp server (frps)</summary>
+<summary>setup-modules/frp-server.bash — install and configure frp server (frps)</summary>
 
 This module installs and configures the [frp server](https://github.com/fatedier/frp) component (`frps`), which acts as a reverse proxy server for clients running `frpc`.
 
