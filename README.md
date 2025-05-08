@@ -58,8 +58,6 @@ This recipe:
 * Runs a hello message
 * Then triggers a simulated failure
 
----
-
 ## Module File Format
 
 Each module in `setup-modules/` is a reusable Bash fragment. Modules:
@@ -71,20 +69,26 @@ Each module in `setup-modules/` is a reusable Bash fragment. Modules:
 
 Modules should **not** include a shebang (`#!/bin/bash`) and should avoid calls to `exit`, unless explicitly designed to abort the entire script.
 
-### Module Example: `setup-modules/test-hello.bash`
+### Module: `setup-modules/test-hello.bash`
 
 ```bash
-logger::log "Hello from test-hello!"
+@module logger.bash
+
+logger::log "Hello from test-hello.bash"
+echo "This is a simple test module."
 ```
 
-### Module Example: `setup-modules/test-failing.bash`
+### Module: `setup-modules/test-failing.bash`
 
 ```bash
-logger::log "Now running a failing test..."
-false  # Simulates failure
+@module logger.bash
+
+logger::log "About to simulate a failure..."
+logger::err "Intentional failure from test-failing.bash"
+echo "This line should not be executed."
 ```
 
-### Module Example: `setup-modules/logger.bash`
+### Module: `setup-modules/logger.bash`
 
 ```bash
 # logger module
