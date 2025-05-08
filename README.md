@@ -84,7 +84,7 @@ This will create a standalone Bash script combining all modules and inline steps
 
 <details>
 
-<summary>setup-modules/logger.bash — Logger Module</summary>
+<summary>`setup-modules/logger.bash` — Logger Module</summary>
 
 This module defines logging helpers for Bash scripts.
 
@@ -104,11 +104,11 @@ logger::err "Something went wrong"
 
 <details>
 
-<summary>setup-modules/shadowsocks.bash — install and configure Shadowsocks</summary>
+<summary>`setup-modules/shadowsocks.bash` — install and configure Shadowsocks</summary>
 
 This module installs and configures a basic [shadowsocks-libev](https://github.com/shadowsocks/shadowsocks-libev) server.
 
-### Depends
+### Dependencies
 
 - setup-modules/logger.bash
 
@@ -164,6 +164,71 @@ export SHADOWSOCKS_PORT=8388
 * This module is intended for localhost-bound server setup (`127.0.0.1`) — suitable for proxying via Tor or similar.
 
 </details>
+
+
+<details>
+
+<summary>`setup-modules/frp-server.bash` — install and configure frp server (frps)</summary>
+
+This module installs and configures the [frp server](https://github.com/fatedier/frp) component (`frps`), which acts as a reverse proxy server for clients running `frpc`.
+
+### Dependencies
+
+* `setup-modules/logger.bash`
+
+### Description
+
+* Installs `curl`, `tar`, `openssl`, and `systemd` dependencies
+* Downloads and installs `frps` from the official GitHub release
+* Generates a secure random token if not explicitly provided
+* Writes a minimal `frps.ini` configuration file to `/etc/frp/frps.ini`
+* Registers and enables the `frps` systemd service
+
+### Environment variables
+
+You **may** define the following variables before running this module:
+
+* `FRP_VERSION` — version of frp to install (default: `"0.62.1"`)
+* `FRP_HOST` — bind address for frps (default: `"127.0.0.1"`)
+* `FRP_PORT` — port to bind frps on (default: `7000`)
+* `FRP_TOKEN` — shared authentication token (default: random 16-byte hex)
+* `FRP_INSTALL_DIR` — location to install `frps` binary (default: `/usr/local/bin`)
+* `FRP_CONF_DIR` — directory for frps config file (default: `/etc/frp`)
+
+If not set, the module will fall back to the defaults above.
+
+### Generated config example
+
+```ini
+# frps config (reverse proxy server)
+[common]
+bind_addr = 127.0.0.1
+bind_port = 7000
+token = auto-generated-hex
+```
+
+### Example usage in a recipe
+
+```bash
+@module frp-server.bash
+```
+
+You can override configuration by setting environment variables beforehand:
+
+```bash
+export FRP_PORT=9000
+export FRP_TOKEN="custom_secure_token"
+@module frp-server.bash
+```
+
+### Notes
+
+* The generated token is only written to `/etc/frp/frps.ini`. Save it if you plan to configure a matching `frpc` client.
+* All critical failures (download, install, configuration, systemd) are logged via `logger::err` and halt execution.
+* This module sets up a **localhost-only** frps instance by default. For public access, override `FRP_HOST`.
+
+</details>
+
 
 ---
 
