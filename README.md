@@ -69,50 +69,6 @@ Each module in `setup-modules/` is a reusable Bash fragment. Modules:
 
 Modules should **not** include a shebang (`#!/bin/bash`) and should avoid calls to `exit`, unless explicitly designed to abort the entire script.
 
-### Module: `setup-modules/test-hello.bash`
-
-```bash
-@module logger.bash
-
-logger::log "Hello from test-hello.bash"
-echo "This is a simple test module."
-```
-
-### Module: `setup-modules/test-failing.bash`
-
-```bash
-@module logger.bash
-
-logger::log "About to simulate a failure..."
-logger::err "Intentional failure from test-failing.bash"
-echo "This line should not be executed."
-```
-
-### Module: `setup-modules/logger.bash`
-
-```bash
-# logger module
-
-# Set default log tag if not defined
-LOG_TAG="${LOG_TAG:-setup-script}"
-
-logger::log() {
-  logger -t "$LOG_TAG" "$1"
-  echo "[*] $1"
-}
-
-logger::err() {
-  logger -t "$LOG_TAG" "[ERROR] $1"
-  echo "[!] ERROR: $1" >&2
-  exit 1
-}
-```
-
-This module defines two logging functions:
-
-* `logger::log "message"`: Logs informational messages.
-* `logger::err "message"`: Logs and prints errors, then exits.
-
 ## Usage
 
 ```bash
@@ -122,6 +78,80 @@ chmod +x dist/debian-proxy-setup.bash
 
 This will create a standalone Bash script combining all modules and inline steps.
 
+---
+
+## Available modules
+
+<details>
+<summary>setup-modules/logger.bash — Logger Module</summary>
+
+This module defines logging helpers for Bash scripts.
+
+### Functions
+
+- `logger::log "message"` — log info to stdout and syslog
+- `logger::err "message"` — log error, print to stderr and exit
+
+Example usage:
+
+```bash
+logger::log "Hello"
+logger::err "Something went wrong"
+```
+</details>
+
+<details>
+<summary>setup-modules/shadowsocks.bash — install and configure Shadowsocks</summary>
+
+This module installs and configures a basic [Shadowsocks-libev](https://github.com/shadowsocks/shadowsocks-libev) server.
+
+### Description
+
+- Depends on: `logger.bash`
+- Installs `openssl`, `jq`, and `shadowsocks-libev`
+- Randomly generates a secure password
+- Writes JSON config to `/etc/shadowsocks-libev/config.json`
+- Starts and enables the systemd service
+
+### Environment variables
+
+You must define the following variables before running this module:
+
+- `SS_METHOD` — encryption method (e.g., `"chacha20-ietf-poly1305"`, `"aes-256-gcm"`)
+- `SS_PORT` — integer port number (e.g., `8388`)
+
+These are used by the config generator via `jq`.
+
+### Generated config example
+
+```json
+{
+  "server": "127.0.0.1",
+  "password": "auto-generated-hex",
+  "method": "chacha20-ietf-poly1305",
+  "mode": "tcp_and_udp",
+  "server_port": 8388,
+  "timeout": 300
+}
+```
+
+### Example usage in a recipe
+
+```bash
+@module logger.bash
+@module shadowsocks.bash
+```
+
+Make sure `SS_METHOD` and `SS_PORT` are defined either in the environment or set explicitly in your recipe.
+
+### Notes
+
+- The generated password is stored only in `/etc/shadowsocks-libev/config.json` — save it if you need it elsewhere.
+- Fails with `logger::err` if any step cannot be completed.
+
+</details>
+
+---
 
 ## License
 
