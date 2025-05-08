@@ -83,6 +83,7 @@ This will create a standalone Bash script combining all modules and inline steps
 ## Available modules
 
 <details>
+
 <summary>setup-modules/logger.bash — Logger Module</summary>
 
 This module defines logging helpers for Bash scripts.
@@ -100,27 +101,34 @@ logger::err "Something went wrong"
 ```
 </details>
 
+
 <details>
+
 <summary>setup-modules/shadowsocks.bash — install and configure Shadowsocks</summary>
 
-This module installs and configures a basic [Shadowsocks-libev](https://github.com/shadowsocks/shadowsocks-libev) server.
+This module installs and configures a basic [shadowsocks-libev](https://github.com/shadowsocks/shadowsocks-libev) server.
+
+### Depends
+
+- setup-modules/logger.bash
 
 ### Description
 
-- Depends on: `logger.bash`
 - Installs `openssl`, `jq`, and `shadowsocks-libev`
-- Randomly generates a secure password
+- Sets sensible defaults for method and port
+- Randomly generates a secure password (unless pre-defined)
 - Writes JSON config to `/etc/shadowsocks-libev/config.json`
 - Starts and enables the systemd service
 
 ### Environment variables
 
-You must define the following variables before running this module:
+You **may** define the following variables before running this module:
 
-- `SS_METHOD` — encryption method (e.g., `"chacha20-ietf-poly1305"`, `"aes-256-gcm"`)
-- `SS_PORT` — integer port number (e.g., `8388`)
+- `SHADOWSOCKS_METHOD` — encryption method (default: `"aes-256-gcm"`)
+- `SHADOWSOCKS_PORT` — integer port number (default: `9951`)
+- `SHADOWSOCKS_PASSWORD` — password for encryption (default: random 16-byte hex string)
 
-These are used by the config generator via `jq`.
+If not set, the module will fall back to the defaults above.
 
 ### Generated config example
 
@@ -128,9 +136,9 @@ These are used by the config generator via `jq`.
 {
   "server": "127.0.0.1",
   "password": "auto-generated-hex",
-  "method": "chacha20-ietf-poly1305",
+  "method": "aes-256-gcm",
   "mode": "tcp_and_udp",
-  "server_port": 8388,
+  "server_port": 9951,
   "timeout": 300
 }
 ```
@@ -138,16 +146,22 @@ These are used by the config generator via `jq`.
 ### Example usage in a recipe
 
 ```bash
-@module logger.bash
 @module shadowsocks.bash
 ```
 
-Make sure `SS_METHOD` and `SS_PORT` are defined either in the environment or set explicitly in your recipe.
+You can override configuration by setting environment variables beforehand:
+
+```bash
+export SHADOWSOCKS_METHOD="chacha20-ietf-poly1305"
+export SHADOWSOCKS_PORT=8388
+@module shadowsocks.bash
+```
 
 ### Notes
 
-- The generated password is stored only in `/etc/shadowsocks-libev/config.json` — save it if you need it elsewhere.
-- Fails with `logger::err` if any step cannot be completed.
+* The generated password is only stored in `/etc/shadowsocks-libev/config.json`. Make sure to back it up if needed.
+* All errors are logged using `logger::err`, which halts execution.
+* This module is intended for localhost-bound server setup (`127.0.0.1`) — suitable for proxying via Tor or similar.
 
 </details>
 
