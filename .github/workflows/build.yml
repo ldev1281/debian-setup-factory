@@ -29,16 +29,14 @@ jobs:
               exit 1
           fi
 
-      - name: Record version
-        run: echo "${GITHUB_REF##*/}" > VERSION
-
       - name: Build all recipes
         run: |
           mkdir -p dist
           for recipe in recipes/*.recipe; do
             bash builder/build.bash "$recipe" > "dist/$(basename "${recipe%.recipe}.bash")"
           done
-          cp VERSION dist/VERSION
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "$VERSION" > dist/VERSION
 
       - name: Create GitHub release for tag
         uses: softprops/action-gh-release@v1
