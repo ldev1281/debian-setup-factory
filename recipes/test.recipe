@@ -1,3 +1,6 @@
-logger.bash
-hello.bash
-failing.bash
+
+# Test recipe
+
+@module logger.bash
+@module test-hello.bash
+@module test-failing.bash

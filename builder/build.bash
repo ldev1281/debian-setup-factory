@@ -32,7 +32,7 @@ embed_module() {
     fi
     INCLUDED_MODULES["$module_path"]=1
 
-    echo "## ---- BEGIN: $module_name ----"
+    echo "# ---- BEGIN: $module_name ----"
 
     while IFS= read -r line || [[ -n "$line" ]]; do
         if [[ "$line" =~ ^@module[[:space:]]+(.+)$ ]]; then
@@ -43,7 +43,7 @@ embed_module() {
         fi
     done < "$module_path"
 
-    echo "## ---- END: $module_name ----"
+    echo "# ---- END: $module_name ----"
     echo
 }
 
@@ -52,9 +52,13 @@ echo "#!/bin/bash"
 echo "# Generated from $(basename "$RECIPE_PATH") on $(date)"
 echo
 
-# Process each line in the recipe file
-while read -r line || [[ -n "$line" ]]; do
-    # Skip comments and empty lines
+# Read and process recipe line-by-line
+while IFS= read -r line || [[ -n "$line" ]]; do
     [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
-    embed_module "$line"
+
+    if [[ "$line" =~ ^@module[[:space:]]+(.+)$ ]]; then
+        embed_module "${BASH_REMATCH[1]}"
+    else
+        echo "$line"
+    fi
 done < "$RECIPE_PATH"
