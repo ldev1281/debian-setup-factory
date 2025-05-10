@@ -13,11 +13,11 @@ logger::log "Installing tor client (tor)"
 
 # Install required dependencies
 apt update || logger::err "Failed to install required packages"
-apt install -y apt-transport-https gnupg wget || logger::err "Failed to install required packages"
+apt install -y apt-transport-https gnupg wget lsb-release nftables || logger::err "Failed to install required packages"
 
 # Defaults
 TOR_CONF_DIR="${TOR_CONF_DIR:-/etc/tor}"
-TOR_CONF_FILE="${TOR_CONF_DIR/torrc/}"
+TOR_CONF_FILE="${TOR_CONF_DIR}/torrc"
 TOR_SOCKS_HOST="127.0.0.1"
 TOR_SOCKS_PORT="9050"
 TOR_DNS_HOST="127.0.5.3"
@@ -31,6 +31,7 @@ TOR_DIST="${TOR_DIST:-$(lsb_release -cs 2>/dev/null)}"
 TOR_MIRROR="https://deb.torproject.org/torproject.org"
 TOR_PACKAGES="tor deb.torproject.org-keyring"
 RESOLV_CONF="/etc/resolv.conf"
+NFTABLES_CONF="/etc/nftables.conf"
 
 # Add apt sources list and install tor packages
 logger::log "Generating $TOR_SOURCES_LIST..."
@@ -49,7 +50,7 @@ apt install -y $TOR_PACKAGES || logger::err "Failed to install Tor packages"
 
 # Write configuration
 logger::log "Writing $TOR_CONF_FILE configuration..."
-mkdir -p "$FRP_CONF_DIR" || logger::err "Failed to create config directory"
+mkdir -p "$TOR_CONF_DIR" || logger::err "Failed to create config directory"
 cat >"$TOR_CONF_FILE" <<EOF || logger::err "Failed to write config $TOR_CONF_FILE"
 SOCKSPort ${TOR_SOCKS_HOST}:${TOR_SOCKS_PORT}
 DNSPort ${TOR_DNS_HOST}:${TOR_DNS_PORT}
@@ -65,7 +66,7 @@ if systemctl is-active systemd-resolved >/dev/null 2>&1; then
 fi
 
 logger::log "Adding DNS servers to $RESOLV_CONF..."
-cat >"$RESOLV_CONF" <<EOF || logger::err "Failed to set DNS servers"
+cat >"$RESOLV_CONF" <<-EOF || logger::err "Failed to set DNS servers"
 nameserver ${TOR_DNS_HOST}
 nameserver 8.8.8.8
 EOF
@@ -75,12 +76,24 @@ EOF
 
 # Creating nftables rules
 logger::log "Creating nftables table and rules..."
-nft add table ip tor || true
-nft add chain ip tor output { type route hook output priority 0 \; policy accept \; } || true
-nft add rule ip tor output ip daddr "${TOR_VIRTUAL_NET}" redirect to "${TOR_TRANS_HOST}:${TOR_TRANS_PORT}" || true
+
+cat >"$NFTABLES_CONF" <<-EOF || logger::err "Failed to write nftables config"
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table ip nat {
+    chain output {
+        type nat hook output priority 0;
+        # Redirect to Tor
+        ip daddr ${TOR_VIRTUAL_NET} tcp dport != ${TOR_TRANS_PORT} redirect to ${TOR_TRANS_PORT}
+    }
+}
+EOF
 
 # Enable and start the services
 logger::log "Enabling and starting nftables and tor services..."
+nft -f /etc/nftables.conf || logger::err "Failed to load nftables rules"
 systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable nftables || logger::err "Failed to enable nftables service"
