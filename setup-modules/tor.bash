@@ -13,11 +13,13 @@ logger::log "Installing tor client (tor)"
 
 # Install required dependencies
 apt update || logger::err "Failed to install required packages"
-apt install -y apt-transport-https gnupg wget lsb-release nftables || logger::err "Failed to install required packages"
+apt install -y apt-transport-https gnupg wget lsb-release nftables netcat-traditional xxd || logger::err "Failed to install required packages"
 
 # Defaults
 TOR_CONF_DIR="${TOR_CONF_DIR:-/etc/tor}"
 TOR_CONF_FILE="${TOR_CONF_DIR}/torrc"
+TOR_CTRL_HOST="127.0.0.1"
+TOR_CTRL_PORT="9051"
 TOR_SOCKS_HOST="127.0.0.1"
 TOR_SOCKS_PORT="9050"
 TOR_DNS_HOST="127.0.5.3"
@@ -52,6 +54,8 @@ apt install -y $TOR_PACKAGES || logger::err "Failed to install Tor packages"
 logger::log "Writing $TOR_CONF_FILE configuration..."
 mkdir -p "$TOR_CONF_DIR" || logger::err "Failed to create config directory"
 cat >"$TOR_CONF_FILE" <<EOF || logger::err "Failed to write config $TOR_CONF_FILE"
+ControlPort ${TOR_CTRL_HOST}:${TOR_CTRL_PORT}
+CookieAuthentication 1
 SOCKSPort ${TOR_SOCKS_HOST}:${TOR_SOCKS_PORT}
 DNSPort ${TOR_DNS_HOST}:${TOR_DNS_PORT}
 TransPort ${TOR_TRANS_HOST}:${TOR_TRANS_PORT} ${TOR_TRANS_OPTS}
@@ -103,7 +107,14 @@ systemctl restart tor || logger::err "Failed to start tor service"
 
 # Checking if tor works
 logger::log "Checking tor is working..."
-wget -O /dev/null http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion/ 2 &>1 || logger::err "Tor is not working correctly, check settings"
+# Wait for a minute
+timeout 60 bash -c '
+  until echo -e "AUTHENTICATE $(xxd -p /run/tor/control.authcookie | tr -d "\n")\r\nGETINFO status/bootstrap-phase\r\nQUIT\r\n" | nc 127.0.0.1 9051 | grep -q "PROGRESS=100"; do
+    sleep 2
+  done
+'  || logger::err "Tor is not working correctly, check settings"
+wget -O /dev/null --quiet http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion/ 2>&1 || logger::err "Tor is not working correctly, check settings"
 
-logger::log "tor transparent proxy is now running on ${TOR_TRANS_HOST}:${TOR_TRANS_PORT}"
-logger::log "tor socks5 proxy is now running on ${TOR_SOCKS_HOST}:${TOR_SOCKS_PORT}"
+logger::log "Tor is working correctly"
+logger::log "Tor transparent proxy is now running on ${TOR_TRANS_HOST}:${TOR_TRANS_PORT}"
+logger::log "Tor socks5 proxy is now running on ${TOR_SOCKS_HOST}:${TOR_SOCKS_PORT}"
