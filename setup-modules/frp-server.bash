@@ -6,7 +6,7 @@
 logger::log "Installing frp server (frps)"
 
 # Install required dependencies
-apt install -y curl openssl tar systemd || logger::err "Failed to install required packages"
+apt update && apt install -y curl openssl tar systemd || logger::err "Failed to install required packages"
 
 # Defaults
 FRP_VERSION="${FRP_VERSION:-0.62.1}"

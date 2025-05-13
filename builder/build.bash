@@ -47,11 +47,6 @@ embed_module() {
     echo
 }
 
-# Script header for the generated output
-echo "#!/bin/bash"
-echo "# Generated from $(basename "$RECIPE_PATH") on $(date)"
-echo
-
 # Read and process recipe line-by-line
 while IFS= read -r line || [[ -n "$line" ]]; do
     [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
@@ -62,3 +57,6 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         echo "$line"
     fi
 done < "$RECIPE_PATH"
+
+echo "# Generated from $(basename "$RECIPE_PATH") on $(date)"
+echo

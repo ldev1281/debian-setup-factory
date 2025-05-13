@@ -1,2 +1,6 @@
+#!/bin/bash
+
+
 @module logger.bash
-@module tor.bash
+@module docker.bash
+@module tor-setup.bash

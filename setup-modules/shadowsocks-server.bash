@@ -2,7 +2,8 @@
 
 @module logger.bash
 
-apt install -y openssl jq || logger::err "Failed to install required packages (openssl, jq)"
+apt update || logger::err "apt update failed"
+apt install -y openssl jq || logger::err "Failed to install required packages"
 
 # Defaults
 SHADOWSOCKS_METHOD="${SHADOWSOCKS_METHOD:-aes-256-gcm}"
