@@ -2,5 +2,5 @@
 
 
 @module logger.bash
-@module docker.bash
+@module docker-setup.bash
 @module tor-setup.bash
