@@ -94,7 +94,7 @@ done
 # waiting hidden service
 #
 logger::log "waiting hidden service up"
-TOR_TRANSPARENT_SETUP_HIDDEN_SERVICE_URL=$(cat /var/lib/tor/${TOR_TRANSPARENT_SETUP_HIDDEN_SERVICE_NAME}_service/hostname)
+TOR_TRANSPARENT_SETUP_HIDDEN_SERVICE_URL="http://$(cat /var/lib/tor/${TOR_TRANSPARENT_SETUP_HIDDEN_SERVICE_NAME}_service/hostname)"
 while ! curl --silent --fail ${TOR_TRANSPARENT_SETUP_HIDDEN_SERVICE_URL} >/dev/null; do
     sleep 5
     logger::log "still waiting hidden service up..."
