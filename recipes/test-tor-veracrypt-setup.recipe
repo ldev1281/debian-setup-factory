@@ -1,0 +1,5 @@
+#!/bin/bash
+
+@module tor-setup.bash
+@module tor-transparent-setup.bash
+@module veracrypt.bash
