@@ -2,4 +2,4 @@
 
 @module tor-setup.bash
 @module tor-transparent-setup.bash
-@module veracrypt.bash
+@module veracrypt-setup.bash
