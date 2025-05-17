@@ -27,9 +27,6 @@ TOR_TRANSPARENCY_CONF_HIDDEN_SERVICE_LISTEN="${TOR_TRANSPARENCY_CONF_HIDDEN_SERV
 #
 logger::log "Transparent transport tor configuration"
 
-# Directory with separate configuration files
-install -m 0755 -d /etc/tor/torrc.d/
-
 #
 # DNS over tor
 #

@@ -50,6 +50,11 @@ logger::log "Default tor configuration"
 # Directory with separate configuration files
 install -m 0755 -d /etc/tor/torrc.d/
 
+# AppArmor rule to allow this directory and its files
+echo '/etc/tor/torrc.d/ r,' >> /etc/apparmor.d/local/system_tor
+echo '/etc/tor/torrc.d/* r,' >> /etc/apparmor.d/local/system_tor
+apparmor_parser -r /etc/apparmor.d/system_tor
+
 # Empty torrc with %include option
 {
     echo "%include /etc/tor/torrc.d/"
