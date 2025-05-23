@@ -74,12 +74,26 @@ systemctl enable tor || logger::err "Failed to enable tor service"
 systemctl restart tor || logger::err "Failed to start tor service"
 
 #
-# waiting tor
+# testing tor setup
 #
-logger::log "waiting tor up"
+logger::log "Testing tor setup"
+_TOR_SETUP_TEST_ATTEMPTS = 0
+_TOR_SETUP_TEST_RESTARTS = 0
 while ! curl --silent --fail -x socks5h://${TOR_SETUP_SOCKS_HOST}:${TOR_SETUP_SOCKS_PORT} http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion >/dev/null; do
-    sleep 5
+    ((_TOR_SETUP_TEST_ATTEMPTS++))
     logger::log "still waiting tor up..."
+
+    if (( _TOR_SETUP_TEST_ATTEMPTS % 6 == 0)); then
+        ((_TOR_SETUP_TEST_RESTARTS++))
+        if ((_TOR_SETUP_TEST_RESTARTS <= 1)); then
+            logger::log "restarting tor..."
+            systemctl restart tor || logger::err "Failed to start tor service"
+        else
+            logger::log "faild to setup tor."
+        fi
+    fi
+    
+    sleep 5
 done
 
 #
