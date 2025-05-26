@@ -4,5 +4,5 @@
 @module logger.bash
 @module docker-setup.bash
 @module tor-setup.bash
-@module tor-transparency-conf.bash
+@module tor-transparent-conf.bash
 @module veracrypt-setup.bash
