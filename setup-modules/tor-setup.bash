@@ -47,31 +47,17 @@ apt install -y tor deb.torproject.org-keyring || logger::err "Failed to install 
 #
 logger::log "Default tor configuration"
 
-# Directory with separate configuration files
-install -m 0755 -d /etc/tor/torrc.d/
-
-# AppArmor rule to allow this directory and its files
-echo '/etc/tor/torrc.d/ r,' >>/etc/apparmor.d/local/system_tor
-echo '/etc/tor/torrc.d/* r,' >>/etc/apparmor.d/local/system_tor
-apparmor_parser -r /etc/apparmor.d/system_tor
-
-# Empty torrc with %include option
-{
-    echo "%include /etc/tor/torrc.d/"
-    echo ""
-} >/etc/tor/torrc
-
 # torrc - socks5 only by default
 {
     echo "SOCKSPort ${TOR_SETUP_SOCKS_HOST}:${TOR_SETUP_SOCKS_PORT}"
     echo ""
-} >/etc/tor/torrc.d/10-socks5.conf
+} >/etc/tor/torrc
 
 # Enable autorun
 systemctl daemon-reexec
 systemctl daemon-reload
-systemctl enable tor || logger::err "Failed to enable tor service"
-systemctl restart tor || logger::err "Failed to start tor service"
+systemctl enable tor@default || logger::err "Failed to enable tor service"
+systemctl restart tor@default || logger::err "Failed to start tor service"
 
 #
 # testing tor setup
@@ -86,10 +72,10 @@ while ! curl --silent --fail -x socks5h://${TOR_SETUP_SOCKS_HOST}:${TOR_SETUP_SO
     if ((_TOR_SETUP_TEST_ATTEMPTS % 6 == 0)); then
         ((_TOR_SETUP_TEST_RESTARTS++))
         if ((_TOR_SETUP_TEST_RESTARTS <= 1)); then
-            logger::log "restarting tor..."
-            systemctl restart tor || logger::err "Failed to start tor service"
+            logger::log "restarting tor@default..."
+            systemctl restart tor@default || logger::err "Failed to start tor@default service"
         else
-            logger::log "faild to setup tor."
+            logger::log "failed to setup tor@default"
         fi
     fi
 
