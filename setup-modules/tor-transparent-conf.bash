@@ -84,6 +84,7 @@ systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable nftables || logger::err "Failed to enable nftables service"
 systemctl restart nftables || logger::err "Failed to start nftables service"
+systemctl enable tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME} || logger::err "Failed to enable tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME} service"
 systemctl restart tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME} || logger::err "Failed to start tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME} service"
 
 #
@@ -121,8 +122,8 @@ while ! curl --silent --fail ${_TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_URL} >/dev/n
     logger::log "still waiting hidden service up..."
 
     if ((_TOR_TRANSPARENT_CONF_HS_TEST_ATTEMPTS % 6 == 0)); then
-        ((_TOR_TRANSPARENT_CONF_TEST_HS_RESTARTS++))
-        if ((_TOR_TRANSPARENT_CONF_TEST_HS_RESTARTS <= 1)); then
+        ((_TOR_TRANSPARENT_CONF_HS_TEST_RESTARTS++))
+        if ((_TOR_TRANSPARENT_CONF_HS_TEST_RESTARTS <= 1)); then
             logger::log "restarting tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME}..."
             systemctl restart tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME} || logger::err "Failed to start tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME} service"
         else

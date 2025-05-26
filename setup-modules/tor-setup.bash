@@ -56,7 +56,7 @@ logger::log "Default tor configuration"
 # Enable autorun
 systemctl daemon-reexec
 systemctl daemon-reload
-systemctl enable tor@default || logger::err "Failed to enable tor service"
+systemctl enable tor || logger::err "Failed to enable tor service"
 systemctl restart tor@default || logger::err "Failed to start tor service"
 
 #
