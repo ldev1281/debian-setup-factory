@@ -102,7 +102,7 @@ while [ ! -f "$_TOR_SINGLEHOP_CONF_HIDDEN_SERVICE_DIR/hostname" ] >/dev/null; do
             logger::log "restarting tor..."
             systemctl restart tor || logger::err "Failed to start tor hidden service (Single Hop) service"
         else
-            logger::log "failed to setup tor hidden service (Single Hop) service"
+            logger::err "failed to setup tor hidden service (Single Hop) service"
         fi
     fi
 

@@ -75,7 +75,7 @@ while ! curl --silent --fail -x socks5h://${TOR_SETUP_SOCKS_HOST}:${TOR_SETUP_SO
             logger::log "restarting tor@default..."
             systemctl restart tor@default || logger::err "Failed to start tor@default service"
         else
-            logger::log "failed to setup tor@default"
+            logger::err "failed to setup tor@default"
         fi
     fi
 

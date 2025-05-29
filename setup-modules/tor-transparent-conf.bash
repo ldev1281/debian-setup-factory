@@ -128,7 +128,7 @@ while ! curl --silent --fail ${_TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_URL} >/dev/n
             logger::log "restarting tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME}..."
             systemctl restart tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME} || logger::err "Failed to start tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME} service"
         else
-            logger::log "failed to setup tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME}"
+            logger::err "failed to setup tor@${TOR_TRANSPARENT_CONF_HIDDEN_SERVICE_NAME}"
         fi
     fi
 
