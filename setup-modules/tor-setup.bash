@@ -89,7 +89,7 @@ while ! curl --silent --fail -x socks5h://${TOR_SETUP_SOCKS_HOST}:${TOR_SETUP_SO
             logger::log "restarting tor..."
             systemctl restart tor || logger::err "Failed to start tor service"
         else
-            logger::log "faild to setup tor."
+            logger::err "faild to setup tor."
         fi
     fi
 
