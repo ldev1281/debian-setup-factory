@@ -30,13 +30,13 @@ logger::log "Default danted configuration"
 
 # Listen and allow only localhost and use login and password
 {
-    echo "logoutput: /var/log/danted.log"
+    echo "logoutput: syslog"
+    echo "internal: ${DANTED_SETUP_INTERNAL_HOST} port = ${DANTED_SETUP_INTERNAL_PORT}"
+    echo "external: ${DANTED_SETUP_EXTERNAL_IFACE}"
+    echo "socksmethod: pam.username"
     echo "user.privileged: proxy"
     echo "user.unprivileged: nobody"
     echo "user.libwrap: nobody"
-    echo "socksmethod: username"
-    echo "internal: ${DANTED_SETUP_INTERNAL_HOST} port = ${DANTED_SETUP_INTERNAL_PORT}"
-    echo "external: ${DANTED_SETUP_EXTERNAL_IFACE}"
     echo "client pass {"
     echo "  from: 0.0.0.0/0 to: ${DANTED_SETUP_INTERNAL_HOST}/32"
     echo "  log: connect disconnect error"
@@ -49,7 +49,6 @@ logger::log "Default danted configuration"
     echo "}"
     echo ""
 } >/etc/danted.conf
-
 
 # danted uses system users. Add a new system user without login access and set a password
 useradd --system --no-create-home --home /nonexistent --shell /usr/sbin/nologin ${DANTED_SETUP_CLIENT_USER} || logger::err "Failed to add user ${DANTED_SETUP_CLIENT_USER}"
