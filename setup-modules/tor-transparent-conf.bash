@@ -112,13 +112,15 @@ while ! curl --silent --fail http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du
 done
 
 #
-# testing hidden service setup
+# testing hidden service setup. first check for hostname file, then try to connect
 #
 logger::log "Testing hidden service setup"
-_TOR_TRANSPARENT_CONF_HS_URL="http://$(cat ${_TOR_TRANSPARENT_CONF_HS_DIR}/hostname)"
 _TOR_TRANSPARENT_CONF_HS_TEST_ATTEMPTS=0
 _TOR_TRANSPARENT_CONF_HS_TEST_RESTARTS=0
-while ! curl --silent --fail ${_TOR_TRANSPARENT_CONF_HS_URL} >/dev/null; do
+
+while ! test -f "$_TOR_TRANSPARENT_CONF_HS_DIR/hostname" ||
+    ! curl --silent --fail "$(cat ${_TOR_TRANSPARENT_CONF_HS_DIR}/hostname)" >/dev/null; do
+
     ((_TOR_TRANSPARENT_CONF_HS_TEST_ATTEMPTS++))
     logger::log "still waiting hidden service up..."
 

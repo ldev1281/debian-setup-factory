@@ -9,7 +9,7 @@ logger::log "Configuring tor hidden service (Single Hop)"
 # Defaults
 #
 TOR_SINGLEHOP_CONF_HS_NAME="${TOR_SINGLEHOP_CONF_HS_NAME:=singlehop}"
-_TOR_SINGLEHOP_CONF_HS_DIR="/var/lib/tor/${TOR_SINGLEHOP_CONF_HS_NAME}"
+_TOR_SINGLEHOP_CONF_HS_DIR="/var/lib/tor-instances/${TOR_SINGLEHOP_CONF_HS_NAME}"
 TOR_SINGLEHOP_CONF_HS_FRP_HOST="${TOR_SINGLEHOP_CONF_HS_FRP_HOST:=127.0.0.1}"
 TOR_SINGLEHOP_CONF_HS_FRP_PORT="${TOR_SINGLEHOP_CONF_HS_FRP_PORT:=7000}"
 TOR_SINGLEHOP_CONF_HS_FRP_LISTEN="${TOR_SINGLEHOP_CONF_HS_FRP_LISTEN:=7000}"
@@ -21,29 +21,26 @@ TOR_SINGLEHOP_CONF_HS_DANTE_LISTEN="${TOR_SINGLEHOP_CONF_HS_DANTE_LISTEN:=1080}"
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
 
 #
-# Install required dependencies
+# Hidden service (Single Hop) tor configuration for Dante and FRP
 #
-logger::log "Installing dependencies"
-
-apt update || logger::err "apt update failed"
-apt install -y netcat-traditional || logger::err "Failed to install required packages"
+logger::log "Hidden service (Single Hop) tor configuration"
 
 #
-# Reset default tor configuration to add hidden service and separate configs for FRP and Dante
+# Creating new tor instance with a separate config, working directory and user
 #
-logger::log "Switching default tor configuration to hidden service (Single Hop)"
+tor-instance-create ${TOR_SINGLEHOP_CONF_HS_NAME} || "failed to setup tor@${TOR_SINGLEHOP_CONF_HS_NAME}"
 
 # Directory with separate configuration files
-install -m 0755 -d /etc/tor/torrc.d/
+install -m 0755 -d /etc/tor/instances/${TOR_SINGLEHOP_CONF_HS_NAME}/torrc.d/
 
 # AppArmor rule to allow this directory and its files
-echo '/etc/tor/torrc.d/ r,' >/etc/apparmor.d/local/system_tor
-echo '/etc/tor/torrc.d/* r,' >>/etc/apparmor.d/local/system_tor
+echo "/etc/tor/instances/${TOR_SINGLEHOP_CONF_HS_NAME}/torrc.d/ r," >/etc/apparmor.d/local/system_tor
+echo "/etc/tor/instances/${TOR_SINGLEHOP_CONF_HS_NAME}/torrc.d/* r," >>/etc/apparmor.d/local/system_tor
 apparmor_parser -r /etc/apparmor.d/system_tor
 
 # Enable hidden service in single hop mode and include configs with %include option
 {
-    echo "# Tor configuration for Dante and FRP gateway"
+    echo "# Tor configuration (Single Hop) for Dante and FRP"
     echo ""
     echo "# Logging"
     echo "Log notice file /var/log/tor/notices.log"
@@ -57,9 +54,9 @@ apparmor_parser -r /etc/apparmor.d/system_tor
     echo "HiddenServiceNonAnonymousMode 1"
     echo ""
     echo "# Include separate configs if any"
-    echo "%include /etc/tor/torrc.d/"
+    echo "%include /etc/tor/instances/${TOR_SINGLEHOP_CONF_HS_NAME}/torrc.d/"
     echo ""
-} >/etc/tor/torrc
+} >/etc/tor/instances/${TOR_SINGLEHOP_CONF_HS_NAME}/torrc
 
 #
 # FRP ports forwarding
@@ -69,7 +66,7 @@ apparmor_parser -r /etc/apparmor.d/system_tor
     echo "HiddenServicePort ${TOR_SINGLEHOP_CONF_HS_FRP_LISTEN} ${TOR_SINGLEHOP_CONF_HS_FRP_HOST}:${TOR_SINGLEHOP_CONF_HS_FRP_PORT}"
     echo ""
 
-} >/etc/tor/torrc.d/10-frp.conf
+} >/etc/tor/instances/${TOR_SINGLEHOP_CONF_HS_NAME}/torrc.d/10-frp.conf
 
 #
 # Dante ports forwarding
@@ -78,31 +75,34 @@ apparmor_parser -r /etc/apparmor.d/system_tor
     echo "# Dante socks5 server"
     echo "HiddenServicePort ${TOR_SINGLEHOP_CONF_HS_DANTE_LISTEN} ${TOR_SINGLEHOP_CONF_HS_DANTE_HOST}:${TOR_SINGLEHOP_CONF_HS_DANTE_PORT}"
     echo ""
-} >/etc/tor/torrc.d/20-dante.conf
+} >/etc/tor/instances/${TOR_SINGLEHOP_CONF_HS_NAME}/torrc.d/20-dante.conf
 
 # Enable and start the services
 systemctl daemon-reexec
 systemctl daemon-reload
-systemctl restart tor || logger::err "Failed to start tor service"
+systemctl enable tor@${TOR_SINGLEHOP_CONF_HS_NAME} || logger::err "Failed to enable tor@${TOR_SINGLEHOP_CONF_HS_NAME} service"
+systemctl restart tor@${TOR_SINGLEHOP_CONF_HS_NAME} || logger::err "Failed to start tor@${TOR_SINGLEHOP_CONF_HS_NAME} service"
 
 #
-# testing hidden service setup
+# testing hidden service setup. first check for hostname file, then try to connect
 #
-logger::log "Testing hidden service (Single Hop) mode setup"
-
+logger::log "Testing hidden service setup"
 _TOR_SINGLEHOP_CONF_HS_TEST_ATTEMPTS=0
 _TOR_SINGLEHOP_CONF_HS_TEST_RESTARTS=0
-while [ ! -f "$_TOR_SINGLEHOP_CONF_HS_DIR/hostname" ] >/dev/null; do
+
+while ! test -f "$_TOR_SINGLEHOP_CONF_HS_DIR/hostname" ||
+    ! curl --silent --fail -x socks5h://${TOR_SETUP_SOCKS_HOST:-127.0.0.1}:${TOR_SETUP_SOCKS_PORT:-9050} "$(cat ${_TOR_SINGLEHOP_CONF_HS_DIR}/hostname)" >/dev/null; do
+
     ((_TOR_SINGLEHOP_CONF_HS_TEST_ATTEMPTS++))
     logger::log "still waiting hidden service (Single Hop) up..."
 
     if ((_TOR_SINGLEHOP_CONF_HS_TEST_ATTEMPTS % 6 == 0)); then
         ((_TOR_SINGLEHOP_CONF_HS_TEST_RESTARTS++))
         if ((_TOR_SINGLEHOP_CONF_HS_TEST_RESTARTS <= 1)); then
-            logger::log "restarting tor..."
-            systemctl restart tor || logger::err "Failed to start tor hidden service (Single Hop) service"
+            logger::log "restarting tor@${TOR_SINGLEHOP_CONF_HS_NAME}..."
+            systemctl restart tor@${TOR_SINGLEHOP_CONF_HS_NAME} || logger::err "Failed to start tor@${TOR_SINGLEHOP_CONF_HS_NAME} service"
         else
-            logger::err "failed to setup tor hidden service (Single Hop) service"
+            logger::err "failed to setup tor@${TOR_SINGLEHOP_CONF_HS_NAME}"
         fi
     fi
 
