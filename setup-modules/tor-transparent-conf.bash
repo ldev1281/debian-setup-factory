@@ -119,7 +119,7 @@ _TOR_TRANSPARENT_CONF_HS_TEST_ATTEMPTS=0
 _TOR_TRANSPARENT_CONF_HS_TEST_RESTARTS=0
 
 while ! test -f "$_TOR_TRANSPARENT_CONF_HS_DIR/hostname" ||
-    ! curl --silent --fail "$(cat ${_TOR_TRANSPARENT_CONF_HS_DIR}/hostname)" >/dev/null; do
+    ! curl --silent --fail "http://$(cat ${_TOR_TRANSPARENT_CONF_HS_DIR}/hostname)" >/dev/null; do
 
     ((_TOR_TRANSPARENT_CONF_HS_TEST_ATTEMPTS++))
     logger::log "still waiting hidden service up..."
