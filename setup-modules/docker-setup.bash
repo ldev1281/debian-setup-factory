@@ -24,7 +24,7 @@ done
 logger::log "Installing dependencies"
 
 apt update || logger::err "apt update failed"
-apt install -y lsb-release ca-certificates curl || logger::err "Failed to install required packages"
+apt install -y lsb-release ca-certificates curl gnupg2 || logger::err "Failed to install required packages"
 
 #
 # Configuring apt & installing docker
@@ -38,7 +38,7 @@ curl -fsSL https://download.docker.com/linux/debian/gpg |
 
 # apt sources list
 {
-    echo "deb [signed-by=/etc/apt/keyrings/docker-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs 2>/dev/null) main"
+    echo "deb [signed-by=/etc/apt/keyrings/docker-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs 2>/dev/null) stable"
     echo ""
 } > /etc/apt/sources.list.d/docker.list
 
