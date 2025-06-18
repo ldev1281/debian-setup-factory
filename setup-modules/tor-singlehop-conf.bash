@@ -42,9 +42,6 @@ apparmor_parser -r /etc/apparmor.d/system_tor
 {
     echo "# Tor configuration (Single Hop) for Dante and FRP"
     echo ""
-    echo "# Logging"
-    echo "Log notice file /var/log/tor/${TOR_SINGLEHOP_CONF_HS_NAME}-notices.log"
-    echo ""
     echo "# Disable client mode"
     echo "SocksPort 0"
     echo ""
