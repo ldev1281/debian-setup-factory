@@ -87,8 +87,7 @@ logger::log "Testing hidden service setup"
 _TOR_SINGLEHOP_CONF_HS_TEST_ATTEMPTS=0
 _TOR_SINGLEHOP_CONF_HS_TEST_RESTARTS=0
 
-while ! test -f "$_TOR_SINGLEHOP_CONF_HS_DIR/hostname" ||
-    ! curl --silent --fail -x socks5h://${TOR_SETUP_SOCKS_HOST:-127.0.0.1}:${TOR_SETUP_SOCKS_PORT:-9050} "http://$(cat ${_TOR_SINGLEHOP_CONF_HS_DIR}/hostname)" >/dev/null; do
+while ! test -f "$_TOR_SINGLEHOP_CONF_HS_DIR/hostname"; do
 
     ((_TOR_SINGLEHOP_CONF_HS_TEST_ATTEMPTS++))
     logger::log "still waiting hidden service (Single Hop) up..."
