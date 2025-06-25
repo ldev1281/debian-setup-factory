@@ -76,13 +76,12 @@ fi
     echo "flush chain ip nat output_tor"
     echo "flush chain ip filter input_tor"
     echo ""
-    echo "# Redirect to Tor and set mark"
-    echo "add rule ip nat prerouting_tor ip daddr ${TOR_TRANSPARENT_CONF_VIRTUAL_NET} tcp dport != ${TOR_TRANSPARENT_CONF_TRANS_PORT} meta mark set 0x1 counter dnat to ${TOR_TRANSPARENT_CONF_TRANS_HOST}:${TOR_TRANSPARENT_CONF_TRANS_PORT}"
-    echo "# Redirect to Tor"
+    echo "# Redirect to Tor from containers"
+    echo "add rule ip nat prerouting_tor ip daddr ${TOR_TRANSPARENT_CONF_VIRTUAL_NET} tcp dport != ${TOR_TRANSPARENT_CONF_TRANS_PORT} counter dnat to ${TOR_TRANSPARENT_CONF_TRANS_HOST}:${TOR_TRANSPARENT_CONF_TRANS_PORT}"
+    echo "# Redirect to Tor from host"
     echo "add rule ip nat output_tor ip daddr ${TOR_TRANSPARENT_CONF_VIRTUAL_NET} tcp dport != ${TOR_TRANSPARENT_CONF_TRANS_PORT} counter dnat to ${TOR_TRANSPARENT_CONF_TRANS_HOST}:${TOR_TRANSPARENT_CONF_TRANS_PORT}"
     echo "# Protect from spoofing loopback network from local network"
-    echo "add rule ip filter input_tor ip daddr 127.0.0.0/8 iifname != "lo" meta mark 0x1 counter accept"
-    echo "add rule ip filter input_tor ip daddr 127.0.0.0/8 iifname != "lo" counter drop"
+    echo "add rule ip filter input_tor ip daddr 127.0.0.0/8 iifname "$(ip route | awk '/default/ {print $5}' | head -n1)" counter drop"
 } >/etc/nftables.conf
 
 # Allow routing to loopback interfaces (to make dnat work).
