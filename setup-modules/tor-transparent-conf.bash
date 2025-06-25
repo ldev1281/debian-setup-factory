@@ -65,20 +65,36 @@ fi
     echo "      }"
     echo "}"
     echo ""
+    echo "table ip filter {"
+    echo "      chain input_tor {"
+    echo "                type filter hook input priority filter -1;"
+    echo "        }"
+    echo "}"
+    echo ""
     echo "# Flush chains if already exist"
     echo "flush chain ip nat prerouting_tor"
     echo "flush chain ip nat output_tor"
+    echo "flush chain ip filter input_tor"
     echo ""
-    echo "# Redirect to Tor"
-    echo "add rule ip nat prerouting_tor ip daddr ${TOR_TRANSPARENT_CONF_VIRTUAL_NET} tcp dport != ${TOR_TRANSPARENT_CONF_TRANS_PORT} counter dnat to ${TOR_TRANSPARENT_CONF_TRANS_HOST}:${TOR_TRANSPARENT_CONF_TRANS_PORT}"
+    echo "# Redirect to Tor and set mark"
+    echo "add rule ip nat prerouting_tor ip daddr ${TOR_TRANSPARENT_CONF_VIRTUAL_NET} tcp dport != ${TOR_TRANSPARENT_CONF_TRANS_PORT} meta mark set 0x1 counter dnat to ${TOR_TRANSPARENT_CONF_TRANS_HOST}:${TOR_TRANSPARENT_CONF_TRANS_PORT}"
     echo "# Redirect to Tor"
     echo "add rule ip nat output_tor ip daddr ${TOR_TRANSPARENT_CONF_VIRTUAL_NET} tcp dport != ${TOR_TRANSPARENT_CONF_TRANS_PORT} counter dnat to ${TOR_TRANSPARENT_CONF_TRANS_HOST}:${TOR_TRANSPARENT_CONF_TRANS_PORT}"
+    echo "# Protect from spoofing loopback network from local network"
+    echo "add rule ip filter input_tor ip daddr 127.0.0.0/8 iifname != "lo" meta mark 0x1 counter accept"
+    echo "add rule ip filter input_tor ip daddr 127.0.0.0/8 iifname != "lo" counter drop"
 } >/etc/nftables.conf
+
+# Allow routing to loopback interfaces (to make dnat work).
+{
+    echo "net.ipv4.conf.all.route_localnet=1"
+} >/etc/sysctl.d/90-tor.conf
 
 # Enable and start the services
 nft -f /etc/nftables.conf || logger::err "Failed to load nftables rules"
 systemctl daemon-reexec
 systemctl daemon-reload
+systemctl force-reload procps || logger::err "Failed to reload procps service"
 systemctl enable nftables || logger::err "Failed to enable nftables service"
 systemctl restart nftables || logger::err "Failed to start nftables service"
 systemctl enable tor@${TOR_TRANSPARENT_CONF_INSTANCE_NAME} || logger::err "Failed to enable tor@${TOR_TRANSPARENT_CONF_INSTANCE_NAME} service"
