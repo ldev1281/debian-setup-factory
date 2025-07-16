@@ -17,3 +17,10 @@ echo "Dante .onion endpoint:    $TOR_SINGLEHOP_CONF_HS_DANTE_HOSTNAME:$DANTED_SE
 echo "Dante username:           $DANTED_SETUP_CLIENT_USER"
 echo "Dante password:           $DANTED_SETUP_CLIENT_PASSWORD"
 echo "----------------------------------------"
+
+#echo "Threeproxy .onion SOCKS5 endpoint:      $TOR_SINGLEHOP_CONF_HS_THREEPROXY_HOSTNAME:$THREEPROXY_SETUP_INTERNAL_PORT"
+#echo "Threeproxy .onion HTTP endpoint:        $TOR_SINGLEHOP_CONF_HS_THREEPROXY_HOSTNAME:$THREEPROXY_SETUP_HTTP_INTERNAL_PORT"
+#echo "Threeproxy .onion SMTP relay endpoint:  $TOR_SINGLEHOP_CONF_HS_THREEPROXY_HOSTNAME:$THREEPROXY_SETUP_SMTP_INTERNAL_PORT"
+#echo "Threeproxy username:                    $THREEPROXY_SETUP_USER"
+#echo "Threeproxy password:                    $THREEPROXY_SETUP_PASSWORD"
+#echo "----------------------------------------"
