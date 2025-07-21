@@ -7,6 +7,11 @@ set -Euo pipefail
 logger::log "Installing 3proxy..."
 
 #
+# 3proxy version
+#
+THREEPROXY_VERSION="${THREEPROXY_VERSION:-0.9.5}"
+
+#
 # Defaults
 #
 THREEPROXY_SETUP_USER="${THREEPROXY_SETUP_USER:-3proxy-user-$(head -c 4 /dev/urandom | base64 | tr -dc 'a-z0-9')}"
@@ -31,8 +36,12 @@ apt install -y wget ca-certificates || logger::err "Failed to install dependenci
 #
 # Download and install .deb package
 #
-DEB_URL="https://github.com/3proxy/3proxy/releases/download/0.9.5/3proxy-0.9.5.x86_64.deb"
-DEB_FILE="/tmp/3proxy-0.9.5.x86_64.deb"
+TMP_DIR="/tmp/3proxy_setup.$$"
+mkdir -p "$TMP_DIR"
+cd "$TMP_DIR" || logger::err "Failed to enter temporary directory"
+
+DEB_URL="https://github.com/3proxy/3proxy/releases/download/${THREEPROXY_VERSION}/3proxy-${THREEPROXY_VERSION}.x86_64.deb"
+DEB_FILE="${TMP_DIR}/3proxy-${THREEPROXY_VERSION}.x86_64.deb"
 
 logger::log "Downloading 3proxy .deb package..."
 wget -q --show-progress -O "$DEB_FILE" "$DEB_URL" || logger::err "Failed to download .deb package"
