@@ -83,7 +83,8 @@ This will create a standalone Bash script combining all modules and inline steps
 ## Documentation
 
 - [Module Authoring Guide](setup-modules/MODULES-AUTHORING-RUS.md)
-- [Module Descriptions](setup-modules/README.md)
+- [Modules manuals](setup-modules/README.md)
+- [Recipes manuals](recipes/README.md)
 
 ---
 
