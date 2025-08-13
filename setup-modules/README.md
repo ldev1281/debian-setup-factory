@@ -57,8 +57,6 @@ This module is fully self-contained and creates a system user for SOCKS authenti
 | `DANTED_SETUP_INTERNAL_HOST`| IP address to bind locally                    | `127.0.0.1`                    |
 | `DANTED_SETUP_INTERNAL_PORT`| Port for SOCKS5 proxy                         | `1080`                         |
 | `DANTED_SETUP_EXTERNAL_IFACE`| Outbound interface (auto-detected via route) | auto                           |
-| `DANTED_SETUP_CLIENT_USER`  | Login user for proxy auth                     | `dante-client-<random>`        |
-| `DANTED_SETUP_CLIENT_PASSWORD` | Login password                            | `openssl rand -hex 16`         |
 
 ### Exported Behavior
 
@@ -257,3 +255,45 @@ This module is intended for headless environments, automation, or encrypted volu
 ```
 
 After execution, veracrypt will be available as a CLI utility for managing encrypted volumes in console environments.
+
+---
+
+## threeproxy-setup.bash — 3proxy Install Module
+
+### Description
+
+The `threeproxy-setup` module installs and configures a full-featured proxy stack using the official [3proxy](https://3proxy.org) package. It includes SOCKS5, HTTP proxy, and SMTP relay support. The module is designed for local proxy deployments with strong password-based authentication and minimal system dependencies.
+
+This setup script is self-contained and suitable for use in initialization workflows. It creates a user for proxy authentication, generates a secure configuration, and ensures the service is enabled and started via systemd.
+
+### Configuration Variables
+
+| Variable                               | Description                                                                 | Default                          |
+|----------------------------------------|-----------------------------------------------------------------------------|----------------------------------|
+| `THREEPROXY_SETUP_USER`                | Login user for proxy authentication                                         | `3proxy-user-<random>`           |
+| `THREEPROXY_SETUP_PASSWORD`            | Password for the proxy user                                                 | `openssl rand -hex 16`           |
+| `PROXY_SETUP_INTERNAL_HOST`            | IP address to bind proxy interfaces                                         | `127.0.0.1`                       |
+| `THREEPROXY_SETUP_INTERNAL_PORT`       | SOCKS5 proxy port                                                           | `1081`                            |
+| `THREEPROXY_SETUP_HTTP_INTERNAL_PORT`  | HTTP proxy port                                                             | `3128`                            |
+| `THREEPROXY_SETUP_SMTP_INTERNAL_PORT`  | Local SMTP relay port                                                       | `587`                             |
+| `THREEPROXY_SETUP_SMTP_RELAY_HOST`     | Remote SMTP relay host                                                      | `smtp.mailgun.org`                |
+| `THREEPROXY_SETUP_SMTP_RELAY_PORT`     | Remote SMTP relay port                                                      | `587`                             |
+
+### Exported Behavior
+
+All logs are routed through the included `logger.bash` module.  
+The module installs the latest `.deb` release of 3proxy, configures multi-protocol support, and sets up a systemd unit at `/etc/systemd/system/3proxy.service`.
+
+### Usage Example
+
+```bash
+@module threeproxy-setup.bash
+```
+
+After execution, the following endpoints are available (all bound to `127.0.0.1` by default):
+
+- **SOCKS5 proxy**: `127.0.0.1:${THREEPROXY_SETUP_INTERNAL_PORT}`
+- **HTTP proxy**: `127.0.0.1:${THREEPROXY_SETUP_HTTP_INTERNAL_PORT}`
+- **SMTP relay**: `127.0.0.1:${THREEPROXY_SETUP_SMTP_INTERNAL_PORT}`  
+
+---
