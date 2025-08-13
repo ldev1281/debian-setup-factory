@@ -48,7 +48,6 @@ fi
 # Set DNS servers
 {
     echo "nameserver ${TOR_TRANSPARENT_CONF_DNS_HOST}"
-    echo "nameserver 8.8.8.8"
 } >/etc/resolv.conf
 
 # nftables rules
