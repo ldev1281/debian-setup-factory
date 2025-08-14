@@ -6,3 +6,4 @@
 @module tor-setup.bash
 @module tor-transparent-conf.bash
 @module veracrypt-setup.bash
+@module backup-tool-setup.bash
