@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 @module logger.bash
 @module docker-setup.bash
 @module tor-setup.bash
@@ -8,3 +7,123 @@
 @module veracrypt-setup.bash
 @module backup-tool-setup.bash
 @module bitwarden-cli-setup.bash
+
+# === Backup-tool (limbo-backup) interactive configuration ===
+
+echo "Backup-tool settings:"
+read -p "Configure backup-tool now? (yes/no) [${CONFIGURE_BACKUP_TOOL:-yes}]: " input
+CONFIGURE_BACKUP_TOOL=${input:-${CONFIGURE_BACKUP_TOOL:-yes}}
+
+if [[ "$CONFIGURE_BACKUP_TOOL" == "yes" ]]; then
+    while :; do
+        read -p "Select protocol (sftp/s3) [${RCLONE_PROTO:-s3}]: " input
+        RCLONE_PROTO=${input:-${RCLONE_PROTO:-s3}}
+        if [[ "$RCLONE_PROTO" == "sftp" || "$RCLONE_PROTO" == "s3" ]]; then
+            break
+        else
+            echo "Please enter 'sftp' or 's3'."
+        fi
+    done
+
+    CONFIG_FILE="/etc/limbo-backup/backup.conf.bash"
+
+    if [[ "$RCLONE_PROTO" == "sftp" ]]; then
+        read -p "RCLONE_SFTP_REMOTE_PATH [${RCLONE_SFTP_REMOTE_PATH:-backups}]: " input
+        RCLONE_SFTP_REMOTE_PATH=${input:-${RCLONE_SFTP_REMOTE_PATH:-backups}}
+
+        read -p "RCLONE_SFTP_HOST [${RCLONE_SFTP_HOST:-your.remote.host}]: " input
+        RCLONE_SFTP_HOST=${input:-${RCLONE_SFTP_HOST:-your.remote.host}}
+
+        read -p "RCLONE_SFTP_PORT [${RCLONE_SFTP_PORT:-22}]: " input
+        RCLONE_SFTP_PORT=${input:-${RCLONE_SFTP_PORT:-22}}
+
+        read -p "RCLONE_SFTP_USER [${RCLONE_SFTP_USER:-backupuser}]: " input
+        RCLONE_SFTP_USER=${input:-${RCLONE_SFTP_USER:-backupuser}}
+
+        read -p "RCLONE_SFTP_PASS [${RCLONE_SFTP_PASS:-}]: " input
+        RCLONE_SFTP_PASS=${input:-${RCLONE_SFTP_PASS:-}}
+
+        CONFIG_LINES=(
+            "# sftp-protocol settings"
+            "RCLONE_PROTO=\"sftp\""
+            "RCLONE_SFTP_REMOTE_PATH=\"${RCLONE_SFTP_REMOTE_PATH}\""
+            "RCLONE_SFTP_HOST=\"${RCLONE_SFTP_HOST}\""
+            "RCLONE_SFTP_PORT=\"${RCLONE_SFTP_PORT}\""
+            "RCLONE_SFTP_USER=\"${RCLONE_SFTP_USER}\""
+            "RCLONE_SFTP_PASS='${RCLONE_SFTP_PASS}'"
+        )
+    fi
+
+    if [[ "$RCLONE_PROTO" == "s3" ]]; then
+        read -p "RCLONE_S3_REMOTE_PATH [${RCLONE_S3_REMOTE_PATH:-backups}]: " input
+        RCLONE_S3_REMOTE_PATH=${input:-${RCLONE_S3_REMOTE_PATH:-backups}}
+
+        read -p "RCLONE_S3_ENDPOINT [${RCLONE_S3_ENDPOINT:-s3.example.com}]: " input
+        RCLONE_S3_ENDPOINT=${input:-${RCLONE_S3_ENDPOINT:-s3.example.com}}
+
+        read -p "RCLONE_S3_BUCKET [${RCLONE_S3_BUCKET:-}]: " input
+        RCLONE_S3_BUCKET=${input:-${RCLONE_S3_BUCKET:-}}
+
+        read -p "RCLONE_S3_KEY [${RCLONE_S3_KEY:-}]: " input
+        RCLONE_S3_KEY=${input:-${RCLONE_S3_KEY:-}}
+
+        read -p "RCLONE_S3_SECRET [${RCLONE_S3_SECRET:-}]: " input
+        RCLONE_S3_SECRET=${input:-${RCLONE_S3_SECRET:-}}
+
+        read -p "RCLONE_S3_REGION [${RCLONE_S3_REGION:-}]: " input
+        RCLONE_S3_REGION=${input:-${RCLONE_S3_REGION:-}}
+
+        read -p "RCLONE_S3_PROVIDER [${RCLONE_S3_PROVIDER:-Other}]: " input
+        RCLONE_S3_PROVIDER=${input:-${RCLONE_S3_PROVIDER:-Other}}
+
+        read -p "RCLONE_S3_STORAGE_CLASS [${RCLONE_S3_STORAGE_CLASS:-STANDARD}]: " input
+        RCLONE_S3_STORAGE_CLASS=${input:-${RCLONE_S3_STORAGE_CLASS:-STANDARD}}
+
+        read -p "RCLONE_S3_ACL [${RCLONE_S3_ACL:-private}]: " input
+        RCLONE_S3_ACL=${input:-${RCLONE_S3_ACL:-private}}
+
+        read -p "RCLONE_S3_SERVER_SIDE_ENCRYPTION [${RCLONE_S3_SERVER_SIDE_ENCRYPTION:-AES256}]: " input
+        RCLONE_S3_SERVER_SIDE_ENCRYPTION=${input:-${RCLONE_S3_SERVER_SIDE_ENCRYPTION:-AES256}}
+
+        CONFIG_LINES=(
+            "# s3-protocol settings"
+            "RCLONE_PROTO=\"s3\""
+            "RCLONE_S3_REMOTE_PATH=\"${RCLONE_S3_REMOTE_PATH}\""
+            "RCLONE_S3_ENDPOINT=\"${RCLONE_S3_ENDPOINT}\""
+            "RCLONE_S3_BUCKET=\"${RCLONE_S3_BUCKET}\""
+            "RCLONE_S3_KEY='${RCLONE_S3_KEY}'"
+            "RCLONE_S3_SECRET='${RCLONE_S3_SECRET}'"
+            "RCLONE_S3_REGION=\"${RCLONE_S3_REGION}\""
+            "RCLONE_S3_PROVIDER=\"${RCLONE_S3_PROVIDER}\""
+            "RCLONE_S3_STORAGE_CLASS=\"${RCLONE_S3_STORAGE_CLASS}\""
+            "RCLONE_S3_ACL=\"${RCLONE_S3_ACL}\""
+            "RCLONE_S3_SERVER_SIDE_ENCRYPTION=\"${RCLONE_S3_SERVER_SIDE_ENCRYPTION}\""
+        )
+    fi
+
+    echo ""
+    echo "The following backup-tool configuration will be saved to ${CONFIG_FILE}:"
+    echo "-----------------------------------------------------------------------"
+    for line in "${CONFIG_LINES[@]}"; do
+        echo "$line"
+    done
+    echo "-----------------------------------------------------------------------"
+    echo ""
+
+    read -p "Proceed with this configuration? (y/n): " CONFIRM
+    echo ""
+    if [[ "$CONFIRM" != "y" ]]; then
+        echo "Server successfully configured"
+        echo "Backup-tool configuration aborted by user."
+        echo ""
+        exit
+    fi
+
+    mkdir -p "$(dirname "$CONFIG_FILE")"
+    printf "%s\n" "${CONFIG_LINES[@]}" >>"$CONFIG_FILE"
+    echo "Configuration saved to $CONFIG_FILE"
+    echo ""
+fi
+
+echo ""
+echo "Server successfully configured"
