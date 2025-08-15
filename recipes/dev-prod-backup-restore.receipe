@@ -1,0 +1,87 @@
+#!/bin/bash
+
+@module logger.bash
+
+REQUIRED_TOOLS="docker limbo-restore.bash"
+
+# === Check for required tools  ===
+
+missed_tools=()
+for cmd in $REQUIRED_TOOLS; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        missed_tools+=("$cmd")
+    fi
+done
+
+if ((${#missed_tools[@]})); then
+    echo "Required tools not found:" >&2
+    for cmd in "${missed_tools[@]}"; do
+        echo "  - $cmd" >&2
+    done
+    echo "Hint: run dev-prod-init.recipe from debian-setup-factory" >&2
+    echo "Abort"
+    exit 127
+fi
+
+# === Restore from backup (limbo-restore) ===
+
+echo "Restore from backup:"
+read -p "Do you want to restore the server from a backup now? (yes/no) [${RESTORE_FROM_BACKUP:-yes}]: " input
+RESTORE_FROM_BACKUP=${input:-${RESTORE_FROM_BACKUP:-yes}}
+
+if [[ "$RESTORE_FROM_BACKUP" == "yes" ]]; then
+    while :; do
+        read -p "Enter backup URL or local path (supports http://, https://, file://, or a local path) [${BACKUP_SOURCE:-}]: " input
+        BACKUP_SOURCE=${input:-${BACKUP_SOURCE:-}}
+
+        if [[ -z "$BACKUP_SOURCE" ]]; then
+            echo "Backup source cannot be empty."
+            continue
+        fi
+
+        if [[ "$BACKUP_SOURCE" =~ ^https?:// ]]; then
+            SOURCE_OK=1
+        elif [[ "$BACKUP_SOURCE" =~ ^file:// ]]; then
+            LOCAL_PATH="${BACKUP_SOURCE#file://}"
+            if [[ -f "$LOCAL_PATH" ]]; then
+                SOURCE_OK=1
+            else
+                echo "Local file from file:// not found: $LOCAL_PATH"
+                SOURCE_OK=0
+            fi
+        else
+            if [[ -f "$BACKUP_SOURCE" ]]; then
+                if command -v readlink >/dev/null 2>&1; then
+                    BACKUP_SOURCE="$(readlink -f "$BACKUP_SOURCE")"
+                fi
+                SOURCE_OK=1
+            else
+                echo "Local file not found: $BACKUP_SOURCE"
+                SOURCE_OK=0
+            fi
+        fi
+
+        [[ "${SOURCE_OK:-0}" -eq 1 ]] && break
+    done
+
+    echo ""
+    echo "The restore script will be executed as:"
+    echo "  limbo-restore.bash \"$BACKUP_SOURCE\""
+    echo ""
+    read -p "Proceed with restore? (y/n): " CONFIRM
+    echo ""
+    if [[ "$CONFIRM" != "y" ]]; then
+        echo "Restore aborted by user."
+        echo ""
+    else
+        limbo-restore.bash "$BACKUP_SOURCE"
+        RESTORE_RC=$?
+        echo ""
+        if [[ $RESTORE_RC -ne 0 ]]; then
+            echo "Restore finished with errors (exit code $RESTORE_RC)."
+        else
+            echo "Restore completed successfully."
+        fi
+        echo ""
+    fi
+fi
