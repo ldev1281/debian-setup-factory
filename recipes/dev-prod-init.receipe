@@ -45,6 +45,7 @@ if [[ "$CONFIGURE_BACKUP_TOOL" == "yes" ]]; then
 
         CONFIG_LINES=(
             "# sftp-protocol settings"
+            "RCLONE_ENABLED=1"
             "RCLONE_PROTO=\"sftp\""
             "RCLONE_SFTP_REMOTE_PATH=\"${RCLONE_SFTP_REMOTE_PATH}\""
             "RCLONE_SFTP_HOST=\"${RCLONE_SFTP_HOST}\""
@@ -70,34 +71,15 @@ if [[ "$CONFIGURE_BACKUP_TOOL" == "yes" ]]; then
         read -p "RCLONE_S3_SECRET [${RCLONE_S3_SECRET:-}]: " input
         RCLONE_S3_SECRET=${input:-${RCLONE_S3_SECRET:-}}
 
-        read -p "RCLONE_S3_REGION [${RCLONE_S3_REGION:-}]: " input
-        RCLONE_S3_REGION=${input:-${RCLONE_S3_REGION:-}}
-
-        read -p "RCLONE_S3_PROVIDER [${RCLONE_S3_PROVIDER:-Other}]: " input
-        RCLONE_S3_PROVIDER=${input:-${RCLONE_S3_PROVIDER:-Other}}
-
-        read -p "RCLONE_S3_STORAGE_CLASS [${RCLONE_S3_STORAGE_CLASS:-STANDARD}]: " input
-        RCLONE_S3_STORAGE_CLASS=${input:-${RCLONE_S3_STORAGE_CLASS:-STANDARD}}
-
-        read -p "RCLONE_S3_ACL [${RCLONE_S3_ACL:-private}]: " input
-        RCLONE_S3_ACL=${input:-${RCLONE_S3_ACL:-private}}
-
-        read -p "RCLONE_S3_SERVER_SIDE_ENCRYPTION [${RCLONE_S3_SERVER_SIDE_ENCRYPTION:-AES256}]: " input
-        RCLONE_S3_SERVER_SIDE_ENCRYPTION=${input:-${RCLONE_S3_SERVER_SIDE_ENCRYPTION:-AES256}}
-
         CONFIG_LINES=(
             "# s3-protocol settings"
+            "RCLONE_ENABLED=1"
             "RCLONE_PROTO=\"s3\""
             "RCLONE_S3_REMOTE_PATH=\"${RCLONE_S3_REMOTE_PATH}\""
             "RCLONE_S3_ENDPOINT=\"${RCLONE_S3_ENDPOINT}\""
             "RCLONE_S3_BUCKET=\"${RCLONE_S3_BUCKET}\""
             "RCLONE_S3_KEY='${RCLONE_S3_KEY}'"
             "RCLONE_S3_SECRET='${RCLONE_S3_SECRET}'"
-            "RCLONE_S3_REGION=\"${RCLONE_S3_REGION}\""
-            "RCLONE_S3_PROVIDER=\"${RCLONE_S3_PROVIDER}\""
-            "RCLONE_S3_STORAGE_CLASS=\"${RCLONE_S3_STORAGE_CLASS}\""
-            "RCLONE_S3_ACL=\"${RCLONE_S3_ACL}\""
-            "RCLONE_S3_SERVER_SIDE_ENCRYPTION=\"${RCLONE_S3_SERVER_SIDE_ENCRYPTION}\""
         )
     fi
 
