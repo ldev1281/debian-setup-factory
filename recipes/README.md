@@ -60,4 +60,4 @@ To build and run **Dev Proxy Setup**:
 > Steps 7–9 can be repeated whenever you update the recipe or want to rebuild the script.
 
 
-## dev-prod-setup.bash
+## dev-prod-init.bash
