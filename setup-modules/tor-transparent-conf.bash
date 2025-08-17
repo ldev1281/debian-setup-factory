@@ -104,7 +104,7 @@ systemctl restart tor@${TOR_TRANSPARENT_CONF_INSTANCE_NAME} || logger::err "Fail
 logger::log "Testing tor setup"
 _TOR_TRANSPARENT_CONF_DNS_TEST_ATTEMPTS=0
 _TOR_TRANSPARENT_CONF_DNS_TEST_RESTARTS=0
-while ! curl --silent --fail -x socks5h://${TOR_SETUP_SOCKS_HOST}:${TOR_SETUP_SOCKS_PORT} http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion >/dev/null; do
+while ! wget --quiet --spider --tries=1 http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion; do
     ((_TOR_TRANSPARENT_CONF_DNS_TEST_ATTEMPTS++))
     logger::log "still waiting tor up..."
 
