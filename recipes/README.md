@@ -1,6 +1,6 @@
 # Recipes manuals
 
-## dev-proxy-setup.bash
+## dev-proxy-setup.recipe
 This guide describes how to build and run the **Dev Proxy Setup** script from the [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory) repository.
 
 The script is generated from a predefined recipe and can be executed directly after building.
@@ -61,7 +61,7 @@ To build and run **Dev Proxy Setup**:
 > Steps 7–9 can be repeated whenever you update the recipe or want to rebuild the script.
 
 
-## dev-prod-init.bash
+## dev-prod-init.recipe
 
 Build and run the **Dev Prod Init** script from [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory).  
 Generates the script from a recipe and runs it.
@@ -126,7 +126,7 @@ To build and run **Dev Prod Init**:
 > ```
 > You’ll be prompted interactively; you can skip or preseed via environment variables if needed.
 
-## dev-prod-backup-restore.bash
+## dev-prod-backup-restore.recipe
 This guide describes how to build and run the **Dev Prod Backup Restore** script from the [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory) repository.
 
 The script is generated from a predefined recipe and can be executed directly after building.
