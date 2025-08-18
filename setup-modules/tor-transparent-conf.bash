@@ -94,7 +94,6 @@ systemctl daemon-reexec
 systemctl daemon-reload
 systemctl force-reload procps || logger::err "Failed to reload procps service"
 systemctl enable nftables || logger::err "Failed to enable nftables service"
-systemctl restart nftables || logger::err "Failed to start nftables service"
 systemctl enable tor@${TOR_TRANSPARENT_CONF_INSTANCE_NAME} || logger::err "Failed to enable tor@${TOR_TRANSPARENT_CONF_INSTANCE_NAME} service"
 systemctl restart tor@${TOR_TRANSPARENT_CONF_INSTANCE_NAME} || logger::err "Failed to start tor@${TOR_TRANSPARENT_CONF_INSTANCE_NAME} service"
 
