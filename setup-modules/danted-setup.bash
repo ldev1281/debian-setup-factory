@@ -8,19 +8,30 @@ logger::log "Installing danted"
 #
 # Defaults
 #
+DANTED_SETUP_VERSION="${DANTED_SETUP_VERSION:-1.4.2+dfsg-7+b8}"
 DANTED_SETUP_INTERNAL_HOST="${DANTED_SETUP_INTERNAL_HOST:-127.0.0.1}"
 DANTED_SETUP_INTERNAL_PORT="${DANTED_SETUP_INTERNAL_PORT:-1080}"
 DANTED_SETUP_EXTERNAL_IFACE="${DANTED_SETUP_EXTERNAL_IFACE:-$(ip route | awk '/default/ {print $5}' | head -n1)}"
-
 
 # Check for root
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
 
 #
-# Installing dante-server package
+# Download & install dante-server from direct URL
 #
+logger::log "Downloading and installing dante-server ${DANTED_SETUP_VERSION}"
+
+TMP_DIR="/tmp/danted_setup.$$"
+mkdir -p "$TMP_DIR"
+cd "$TMP_DIR" || logger::err "Failed to enter temporary directory"
+
+DEB_URL="http://ftp.debian.org/debian/pool/main/d/dante/dante-server_${DANTED_SETUP_VERSION}_amd64.deb"
+DEB_FILE="${TMP_DIR}/dante-server_${DANTED_SETUP_VERSION}_amd64.deb"
+
+curl -fsSL -o "$DEB_FILE" "$DEB_URL" || logger::err "Failed to download dante-server deb"
+
 apt update || logger::err "apt update failed"
-apt install -y dante-server || logger::err "Failed to install danted package (dante-server)"
+apt install -y "$DEB_FILE" || logger::err "Failed to install danted package from deb"
 
 #
 # Default dante-server configuration
