@@ -74,6 +74,9 @@ if [[ "$CONFIGURE_BACKUP_TOOL" == "yes" ]]; then
         read -p "RCLONE_S3_SECRET [${RCLONE_S3_SECRET:-}]: " input
         RCLONE_S3_SECRET=${input:-${RCLONE_S3_SECRET:-}}
 
+        read -p "RCLONE_S3_NO_CHECK_BUCKET [${RCLONE_S3_NO_CHECK_BUCKET:-true}]: " input
+        RCLONE_S3_NO_CHECK_BUCKET=${input:-${RCLONE_S3_NO_CHECK_BUCKET:-true}}
+
         CONFIG_LINES=(
             "# s3-protocol settings"
             "RCLONE_ENABLED=1"
@@ -84,6 +87,7 @@ if [[ "$CONFIGURE_BACKUP_TOOL" == "yes" ]]; then
             "RCLONE_S3_BUCKET=\"${RCLONE_S3_BUCKET}\""
             "RCLONE_S3_KEY='${RCLONE_S3_KEY}'"
             "RCLONE_S3_SECRET='${RCLONE_S3_SECRET}'"
+            "RCLONE_S3_NO_CHECK_BUCKET=${RCLONE_S3_NO_CHECK_BUCKET}"
         )
         if [[ "${RCLONE_S3_PROVIDER,,}" == "aws" ]]; then
             read -p "RCLONE_S3_REGION [${RCLONE_S3_REGION:-}]: " input
