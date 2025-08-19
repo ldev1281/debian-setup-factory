@@ -14,7 +14,33 @@ echo "Backup-tool settings:"
 read -p "Configure backup-tool now? (yes/no) [${CONFIGURE_BACKUP_TOOL:-yes}]: " input
 CONFIGURE_BACKUP_TOOL=${input:-${CONFIGURE_BACKUP_TOOL:-yes}}
 
-if [[ "$CONFIGURE_BACKUP_TOOL" == "yes" ]]; then
+if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
+    # === Optional GPG encryption ===
+    read -p "Use GPG encryption for backups? (yes/no) [${GPG_ENABLE:-yes}]: " input
+    GPG_ENABLE=${input:-${GPG_ENABLE:-yes}}
+    GPG_ENABLED=0
+    GPG_FINGERPRINT=""
+    if [[ "${GPG_ENABLE,,}" == "yes" ]]; then
+        while :; do
+            read -p "Path to ASCII-armored public GPG key file [.asc]: " GPG_PUBKEY_PATH
+            if [[ -f "$GPG_PUBKEY_PATH" ]]; then
+                # Derive fingerprint FIRST (without importing), then import into the current user's keyring (this script runs as root).
+                GPG_FINGERPRINT=$(gpg --with-colons --import-options show-only --import "$GPG_PUBKEY_PATH" 2>/dev/null | awk -F: '/^fpr:/{print $10; exit}')
+                if [[ -z "$GPG_FINGERPRINT" ]]; then
+                    echo "Could not read a fingerprint from the provided key. Please provide a valid ASCII-armored public key."
+                else
+                    echo "Importing public key into keyring..."
+                    gpg --batch --import "$GPG_PUBKEY_PATH"
+                    GPG_ENABLED=1
+                    echo "GPG key imported. Fingerprint: $GPG_FINGERPRINT"
+                    break
+                fi
+            else
+                echo "File not found: $GPG_PUBKEY_PATH"
+            fi
+        done
+    fi
+
     while :; do
         read -p "Select protocol (sftp/s3) [${RCLONE_PROTO:-s3}]: " input
         RCLONE_PROTO=${input:-${RCLONE_PROTO:-s3}}
@@ -44,6 +70,9 @@ if [[ "$CONFIGURE_BACKUP_TOOL" == "yes" ]]; then
         RCLONE_SFTP_PASS=${input:-${RCLONE_SFTP_PASS:-}}
 
         CONFIG_LINES=(
+            "# gpg settings"
+            "GPG_ENABLED=${GPG_ENABLED}"
+            "GPG_FINGERPRINT="${GPG_FINGERPRINT}""
             "# sftp-protocol settings"
             "RCLONE_ENABLED=1"
             "RCLONE_PROTO=\"sftp\""
@@ -78,6 +107,9 @@ if [[ "$CONFIGURE_BACKUP_TOOL" == "yes" ]]; then
         RCLONE_S3_NO_CHECK_BUCKET=${input:-${RCLONE_S3_NO_CHECK_BUCKET:-true}}
 
         CONFIG_LINES=(
+            "# gpg settings"
+            "GPG_ENABLED=${GPG_ENABLED}"
+            "GPG_FINGERPRINT=\"${GPG_FINGERPRINT}\""
             "# s3-protocol settings"
             "RCLONE_ENABLED=1"
             "RCLONE_PROTO=\"s3\""
