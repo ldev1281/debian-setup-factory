@@ -32,9 +32,12 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
                     echo "Could not read a fingerprint from the provided key. Please provide a valid ASCII-armored public key."
                 else
                     echo "Importing public key into keyring..."
-                    gpg --batch --import "$GPG_PUBKEY_PATH"
+                    gpg --batch --import "$GPG_PUBKEY_PATH" || {
+                        echo "Public key import failed"
+                        break
+                    }
                     GPG_ENABLED=1
-                    echo "GPG key imported. Fingerprint: $GPG_FINGERPRINT"
+                    echo "GPG public key imported. Fingerprint: $GPG_FINGERPRINT"
                     break
                 fi
             else
