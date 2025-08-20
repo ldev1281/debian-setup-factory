@@ -15,6 +15,7 @@ TOR_TRANSPARENT_CONF_TRANS_HOST="${TOR_TRANSPARENT_CONF_TRANS_HOST:-127.0.0.1}"
 TOR_TRANSPARENT_CONF_TRANS_PORT="${TOR_TRANSPARENT_CONF_TRANS_PORT:-9040}"
 TOR_TRANSPARENT_CONF_TRANS_OPTS="${TOR_TRANSPARENT_CONF_TRANS_OPTS:-IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort}"
 TOR_TRANSPARENT_CONF_VIRTUAL_NET="${TOR_TRANSPARENT_CONF_VIRTUAL_NET:-10.192.0.0/10}"
+TOR_TRANSPARENT_CONF_AUTOMAP_SUFFIXES="${TOR_TRANSPARENT_CONF_AUTOMAP_SUFFIXES:-.onion,.exit,check.torproject.org}"
 
 # Check for root
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
@@ -36,6 +37,7 @@ tor-instance-create ${TOR_TRANSPARENT_CONF_INSTANCE_NAME} || "failed to setup to
     echo "DNSPort ${TOR_TRANSPARENT_CONF_DNS_HOST}:${TOR_TRANSPARENT_CONF_DNS_PORT}"
     echo "TransPort ${TOR_TRANSPARENT_CONF_TRANS_HOST}:${TOR_TRANSPARENT_CONF_TRANS_PORT} ${TOR_TRANSPARENT_CONF_TRANS_OPTS}"
     echo "VirtualAddrNetworkIPv4 ${TOR_TRANSPARENT_CONF_VIRTUAL_NET}"
+    echo "AutomapHostsSuffixes ${TOR_TRANSPARENT_CONF_AUTOMAP_SUFFIXES}"
     echo "AutomapHostsOnResolve 1"
     echo ""
 } >/etc/tor/instances/${TOR_TRANSPARENT_CONF_INSTANCE_NAME}/torrc
@@ -103,7 +105,7 @@ systemctl restart tor@${TOR_TRANSPARENT_CONF_INSTANCE_NAME} || logger::err "Fail
 logger::log "Testing tor setup"
 _TOR_TRANSPARENT_CONF_DNS_TEST_ATTEMPTS=0
 _TOR_TRANSPARENT_CONF_DNS_TEST_RESTARTS=0
-while ! wget --quiet --spider --tries=1 http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion; do
+while ! curl --silent --fail https://check.torproject.org >/dev/null; do
     ((_TOR_TRANSPARENT_CONF_DNS_TEST_ATTEMPTS++))
     logger::log "still waiting tor up..."
 
