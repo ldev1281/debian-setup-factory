@@ -72,7 +72,7 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
         CONFIG_LINES=(
             "# gpg settings"
             "GPG_ENABLED=${GPG_ENABLED}"
-            "GPG_FINGERPRINT="${GPG_FINGERPRINT}""
+            "GPG_FINGERPRINT=\"${GPG_FINGERPRINT}\""
             "# sftp-protocol settings"
             "RCLONE_ENABLED=1"
             "RCLONE_PROTO=\"sftp\""
