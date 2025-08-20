@@ -15,6 +15,8 @@ read -p "Configure backup-tool now? (yes/no) [${CONFIGURE_BACKUP_TOOL:-yes}]: " 
 CONFIGURE_BACKUP_TOOL=${input:-${CONFIGURE_BACKUP_TOOL:-yes}}
 
 if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
+    BACKUP_CONFIG_FILE="/etc/limbo-backup/backup.conf.bash"
+
     # === Optional GPG encryption ===
     read -p "Use GPG encryption for backups? (yes/no) [${GPG_ENABLE:-yes}]: " input
     GPG_ENABLE=${input:-${GPG_ENABLE:-yes}}
@@ -42,7 +44,7 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
     fi
 
     while :; do
-        read -p "Select protocol (sftp/s3) [${RCLONE_PROTO:-s3}]: " input
+        read -p "Select protocol for uploading backups (sftp/s3) [${RCLONE_PROTO:-s3}]: " input
         RCLONE_PROTO=${input:-${RCLONE_PROTO:-s3}}
         if [[ "$RCLONE_PROTO" == "sftp" || "$RCLONE_PROTO" == "s3" ]]; then
             break
@@ -50,8 +52,6 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
             echo "Please enter 'sftp' or 's3'."
         fi
     done
-
-    CONFIG_FILE="/etc/limbo-backup/backup.conf.bash"
 
     if [[ "$RCLONE_PROTO" == "sftp" ]]; then
         read -p "RCLONE_SFTP_REMOTE_PATH [${RCLONE_SFTP_REMOTE_PATH:-backups}]: " input
@@ -144,7 +144,7 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
     fi
 
     echo ""
-    echo "The following backup-tool configuration will be saved to ${CONFIG_FILE}:"
+    echo "The following backup-tool configuration will be saved to ${BACKUP_CONFIG_FILE}:"
     echo "-----------------------------------------------------------------------"
     for line in "${CONFIG_LINES[@]}"; do
         echo "$line"
@@ -155,15 +155,15 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
     read -p "Proceed with this configuration? (y/n): " CONFIRM
     echo ""
     if [[ "$CONFIRM" != "y" ]]; then
+        echo "Backup-tool configuration aborted by user"
         echo "Server successfully configured"
-        echo "Backup-tool configuration aborted by user."
         echo ""
         exit
     fi
 
-    mkdir -p "$(dirname "$CONFIG_FILE")"
-    printf "%s\n" "${CONFIG_LINES[@]}" >>"$CONFIG_FILE"
-    echo "Configuration saved to $CONFIG_FILE"
+    mkdir -p "$(dirname "$BACKUP_CONFIG_FILE")"
+    printf "%s\n" "${CONFIG_LINES[@]}" >>"$BACKUP_CONFIG_FILE"
+    echo "Configuration saved to $BACKUP_CONFIG_FILE"
     echo ""
 fi
 
