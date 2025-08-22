@@ -16,6 +16,7 @@ CONFIGURE_BACKUP_TOOL=${input:-${CONFIGURE_BACKUP_TOOL:-yes}}
 
 if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
     BACKUP_CONFIG_FILE="/etc/limbo-backup/backup.conf.bash"
+    RESTORE_CONFIG_FILE="/etc/limbo-backup/restore.conf.bash"
 
     # === Optional GPG encryption ===
     read -p "Use GPG encryption for backups? (yes/no) [${GPG_ENABLE:-yes}]: " input
@@ -72,11 +73,9 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
         read -p "RCLONE_SFTP_PASS [${RCLONE_SFTP_PASS:-}]: " input
         RCLONE_SFTP_PASS=${input:-${RCLONE_SFTP_PASS:-}}
 
-        CONFIG_LINES=(
-            "# gpg settings"
+        BACKUP_CONFIG_LINES=(
             "GPG_ENABLED=${GPG_ENABLED}"
             "GPG_FINGERPRINT=\"${GPG_FINGERPRINT}\""
-            "# sftp-protocol settings"
             "RCLONE_ENABLED=1"
             "RCLONE_PROTO=\"sftp\""
             "RCLONE_SFTP_REMOTE_PATH=\"${RCLONE_SFTP_REMOTE_PATH}\""
@@ -84,6 +83,9 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
             "RCLONE_SFTP_PORT=\"${RCLONE_SFTP_PORT}\""
             "RCLONE_SFTP_USER=\"${RCLONE_SFTP_USER}\""
             "RCLONE_SFTP_PASS='${RCLONE_SFTP_PASS}'"
+        )
+        RESTORE_CONFIG_LINES=(
+            "GPG_ENABLED=${GPG_ENABLED}"
         )
     fi
 
@@ -109,11 +111,9 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
         read -p "RCLONE_S3_NO_CHECK_BUCKET [${RCLONE_S3_NO_CHECK_BUCKET:-true}]: " input
         RCLONE_S3_NO_CHECK_BUCKET=${input:-${RCLONE_S3_NO_CHECK_BUCKET:-true}}
 
-        CONFIG_LINES=(
-            "# gpg settings"
+        BACKUP_CONFIG_LINES=(
             "GPG_ENABLED=${GPG_ENABLED}"
             "GPG_FINGERPRINT=\"${GPG_FINGERPRINT}\""
-            "# s3-protocol settings"
             "RCLONE_ENABLED=1"
             "RCLONE_PROTO=\"s3\""
             "RCLONE_S3_PROVIDER=\"${RCLONE_S3_PROVIDER}\""
@@ -124,6 +124,10 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
             "RCLONE_S3_SECRET='${RCLONE_S3_SECRET}'"
             "RCLONE_S3_NO_CHECK_BUCKET=${RCLONE_S3_NO_CHECK_BUCKET}"
         )
+        RESTORE_CONFIG_LINES=(
+            "GPG_ENABLED=${GPG_ENABLED}"
+        )
+
         if [[ "${RCLONE_S3_PROVIDER,,}" == "aws" ]]; then
             read -p "RCLONE_S3_REGION [${RCLONE_S3_REGION:-}]: " input
             RCLONE_S3_REGION=${input:-${RCLONE_S3_REGION:-}}
@@ -137,7 +141,7 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
             read -p "RCLONE_S3_SERVER_SIDE_ENCRYPTION [${RCLONE_S3_SERVER_SIDE_ENCRYPTION:-AES256}]: " input
             RCLONE_S3_SERVER_SIDE_ENCRYPTION=${input:-${RCLONE_S3_SERVER_SIDE_ENCRYPTION:-AES256}}
 
-            CONFIG_LINES+=(
+            BACKUP_CONFIG_LINES+=(
                 "RCLONE_S3_REGION=\"${RCLONE_S3_REGION}\""
                 "RCLONE_S3_STORAGE_CLASS=\"${RCLONE_S3_STORAGE_CLASS}\""
                 "RCLONE_S3_ACL=\"${RCLONE_S3_ACL}\""
@@ -149,7 +153,15 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
     echo ""
     echo "The following backup-tool configuration will be saved to ${BACKUP_CONFIG_FILE}:"
     echo "-----------------------------------------------------------------------"
-    for line in "${CONFIG_LINES[@]}"; do
+    for line in "${BACKUP_CONFIG_LINES[@]}"; do
+        echo "$line"
+    done
+    echo "-----------------------------------------------------------------------"
+    echo ""
+
+    echo "The following backup-tool configuration will be saved to ${RESTORE_CONFIG_FILE}:"
+    echo "-----------------------------------------------------------------------"
+    for line in "${RESTORE_CONFIG_LINES[@]}"; do
         echo "$line"
     done
     echo "-----------------------------------------------------------------------"
@@ -164,9 +176,34 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
         exit
     fi
 
-    mkdir -p "$(dirname "$BACKUP_CONFIG_FILE")"
-    printf "%s\n" "${CONFIG_LINES[@]}" >>"$BACKUP_CONFIG_FILE"
+    # Existing variables will be set with new values or not touched if they are already set. New variables will be appended to the config file
+    for line in "${BACKUP_CONFIG_LINES[@]}"; do
+        key=${line%%=*}
+        repl=${line//&/\\&}
+        repl=${repl//|/\\|}
+        line_slash_esc=${line//\//\\/}
+        sed -i \
+            -e "/^[[:space:]]*${line_slash_esc}\$/ { h; b; }" \
+            -e "/^[[:space:]]*${key}=/ { s|.*|${repl}|; h; }" \
+            -e '$ { x; /./ { x; b; }; x; a\'$'\n'''"$line"''$'\n'' }' \
+            "$BACKUP_CONFIG_FILE"
+    done
     echo "Configuration saved to $BACKUP_CONFIG_FILE"
+    echo ""
+
+    # Existing variables will be set with new values or not touched if they are already set. New variables will be appended to the config file
+    for line in "${RESTORE_CONFIG_LINES[@]}"; do
+        key=${line%%=*}
+        repl=${line//&/\\&}
+        repl=${repl//|/\\|}
+        line_slash_esc=${line//\//\\/}
+        sed -i \
+            -e "/^[[:space:]]*${line_slash_esc}\$/ { h; b; }" \
+            -e "/^[[:space:]]*${key}=/ { s|.*|${repl}|; h; }" \
+            -e '$ { x; /./ { x; b; }; x; a\'$'\n'''"$line"''$'\n'' }' \
+            "$RESTORE_CONFIG_FILE"
+    done
+    echo "Configuration saved to $RESTORE_CONFIG_FILE"
     echo ""
 fi
 
