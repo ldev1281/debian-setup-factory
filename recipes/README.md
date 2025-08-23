@@ -118,7 +118,7 @@ To build and run **Dev Prod Init**:
    ```
 9. **Optionally prepare ASCII-armored GPG public key** (see Notes):
    ```
-   /tmp/privkey.asc
+   /tmp/pubkey.asc
    ```
 10. **Run the script**:
    ```bash
