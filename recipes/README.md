@@ -208,8 +208,8 @@ To build and run **Dev Prod Backup Restore**:
 > This script should only be executed after running **dev-prod-init**,
 > as it relies on the server environment prepared by that recipe.
 >
-> During execution, the script can optionally use GPG to decrypt the backup
-> and import your private and public GPG keys for later use.
+> During execution, the script can optionally use private GPG key to decrypt the backup
+> and import your public GPG key for later use (backup encryption).
 >
 > If you want to use GPG to decrypt the backup,
 > prepare your private and public GPG keys
