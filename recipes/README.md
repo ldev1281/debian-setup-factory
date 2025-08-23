@@ -63,9 +63,13 @@ To build and run **Dev Proxy Setup**:
 
 ## dev-prod-init.recipe
 
-Build and run the **Dev Prod Init** script from [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory).  
+Build and run the **Dev Prod Init** script from [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory).
 Generates the script from a recipe and runs it.
 It is intended for setting up a server that consists of **Docker**, **Tor**, **Tor Transparent**, **VeraCrypt**, **Backup Tool**, and **Bitwarden CLI**.
+
+Optionally, the script can also configure the **backup-tool**
+for using **S3 storage** and **GPG encryption** for backups.
+
 
 ---
 
@@ -112,19 +116,30 @@ To build and run **Dev Prod Init**:
    ```bash
    chmod +x dist/dev-prod-init.bash
    ```
-
-9. **Run the script**:
+9. **Optionally prepare ASCII-armored GPG public keys** (see Notes):
+   ```
+   /tmp/privkey.asc
+   ```
+10. **Run the script**:
    ```bash
    ./dist/dev-prod-init.bash
    ```
 
-> **Note (backup module):**  
-> During execution, the script may install and configure the **backup-tool** module (SFTP/S3).  
+> **Note (backup module):**
+>
+> During execution, the script can optionally install and configure the **backup-tool** module (SFTP/S3).
+>
+> If you want to use GPG encryption for backups, prepare your public GPG key and store it in a temporary folder.
+>
 > Configuration is saved to:
 > ```
 > /etc/limbo-backup/backup.conf.bash
+> /etc/limbo-backup/restore.conf.bash
 > ```
-> You’ll be prompted interactively; you can skip or preseed via environment variables if needed.
+>
+> You’ll be prompted interactively.s
+> You can skip or preseed via environment variables if needed.
+
 
 ## dev-prod-backup-restore.recipe
 This guide describes how to build and run the **Dev Prod Backup Restore** script from the [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory) repository.
@@ -178,10 +193,24 @@ To build and run **Dev Prod Backup Restore**:
    chmod +x dist/dev-prod-backup-restore.bash
    ```
 
-9. **Run the script**:
+9. **Optionally prepare ASCII-armored GPG private and public keys** (see Notes):
+   ```
+   /tmp/privkey.asc
+   /tmp/pubkey.asc
+   ```
+
+10. **Run the script**:
    ```
    ./dist/dev-prod-backup-restore.bash
    ```
 
 > **Note:**
-> This script should only be executed after running **dev-prod-init**, as it relies on the server environment prepared by that recipe.
+> This script should only be executed after running **dev-prod-init**,
+> as it relies on the server environment prepared by that recipe.
+>
+> During execution, the script can optionally use GPG to decrypt the backup
+> and import your private and public GPG keys for later use.
+>
+> If you want to use GPG to decrypt the backup,
+> prepare your private and public GPG keys
+> and store them in a temporary folder.
