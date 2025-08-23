@@ -116,7 +116,7 @@ To build and run **Dev Prod Init**:
    ```bash
    chmod +x dist/dev-prod-init.bash
    ```
-9. **Optionally prepare ASCII-armored GPG public keys** (see Notes):
+9. **Optionally prepare ASCII-armored GPG public key** (see Notes):
    ```
    /tmp/privkey.asc
    ```
