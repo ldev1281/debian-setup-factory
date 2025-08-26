@@ -8,7 +8,7 @@ logger::log "Installing backup-tool"
 #
 # Defaults
 #
-BACKUP_TOOL_VERSION="${BACKUP_TOOL_VERSION:-0.4}"
+BACKUP_TOOL_VERSION="${BACKUP_TOOL_VERSION:-0.5}"
 
 # Check for root
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
