@@ -96,6 +96,7 @@ while :; do
     read -p "Type your machine access token BWS_ACCESS_TOKEN [${BWS_ACCESS_TOKEN:-}]: " input
     BWS_ACCESS_TOKEN=${input:-${BWS_ACCESS_TOKEN:-}}
     if [ -n "$BWS_ACCESS_TOKEN" ]; then
+        export BWS_ACCESS_TOKEN
         break
     else
         echo "BWS_ACCESS_TOKEN can't be empty"
@@ -117,4 +118,4 @@ DANTED_SETUP_INTERNAL_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_P
 FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-port'"
 
 
-export BWS_ACCESS_TOKEN BWS_PROJECT_NAME BWS_PROJECT_ID DANTED_SETUP_INTERNAL_PORT FRP_PORT
+export BWS_PROJECT_NAME BWS_PROJECT_ID DANTED_SETUP_INTERNAL_PORT FRP_PORT
