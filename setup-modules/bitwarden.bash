@@ -59,16 +59,16 @@ bitwarden::create_secret() {
   local value="${3:?}"
   local note="${4-}"
   if [[ -n "$note" ]]; then
-    bws secret create "$key" "$value" "$project_id" --note "$note" || return 1
+    bws secret create "$key" "$value" "$project_id" --note "$note" >/dev/null || return 1
   else
-    bws secret create "$key" "$value" "$project_id" || return 1
+    bws secret create "$key" "$value" "$project_id" >/dev/null || return 1
   fi
 }
 
 # Edit an existing secret by id (change value/key/note/project)
 bitwarden::edit_secret() {
   local secret_id="${1:?usage: bitwarden::edit_secret <secret_id> [--key K] [--value V] [--note N] [--project-id PID]}"
-  bws secret edit "$@" || return 1
+  bws secret edit "$@" >/dev/null || return 1
 }
 
 # Upsert by KEY within a project: create if not found, else update value (and optionally note)
