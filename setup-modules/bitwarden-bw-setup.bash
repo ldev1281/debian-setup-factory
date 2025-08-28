@@ -31,7 +31,4 @@ unzip -q "${ARCHIVE_FILE}" || logger::err "Failed to extract Bitwarden CLI archi
 # Install binary
 install -m 755 bw "${BW_INSTALL_DIR}/bw" || logger::err "Failed to install Bitwarden CLI"
 
-# Clean up
-rm -rf "$TMP_DIR" || true
-
 logger::log "Bitwarden CLI v${BW_VERSION} installation complete"

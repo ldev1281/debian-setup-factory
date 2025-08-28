@@ -30,9 +30,6 @@ curl -fsSL -o "${TMP_DIR}/${DEB_FILE}" "${DEB_URL}" || logger::err "Failed to do
 apt update || logger::err "apt update failed"
 apt install -y "${TMP_DIR}/${DEB_FILE}" || logger::err "Failed to install backup-tool"
 
-# Clean up
-rm -rf "$TMP_DIR" || true
-
 #
 # Done!
 #
