@@ -13,10 +13,10 @@ BW_INSTALL_DIR="${BW_INSTALL_DIR:-/usr/local/bin}"
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
 
 # Install required dependencies
-apt update && apt install -y curl unzip || logger::err "Failed to install required packages"
+apt update && apt install -y curl unzip jq || logger::err "Failed to install required packages"
 
 # Download and extract Bitwarden CLI
-TMP_DIR="/tmp/bitwarden_cli_setup.$$"
+TMP_DIR="/tmp/bitwarden_bw_setup.$$"
 mkdir -p "$TMP_DIR"
 cd "$TMP_DIR" || logger::err "Failed to enter temporary directory"
 

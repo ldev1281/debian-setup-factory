@@ -6,7 +6,7 @@
 @module tor-transparent-conf.bash
 @module veracrypt-setup.bash
 @module backup-tool-setup.bash
-@module bitwarden-cli-setup.bash
+@module bitwarden-bws-setup.bash
 
 # === Backup-tool (limbo-backup) interactive configuration ===
 
