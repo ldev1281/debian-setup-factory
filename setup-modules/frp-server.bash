@@ -1,6 +1,7 @@
 # frp server setup module
 
 @module logger.bash
+@module bitwarden.bash
 
 # Inform about chosen settings
 logger::log "Installing frp server (frps)"
