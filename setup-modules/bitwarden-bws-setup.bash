@@ -30,7 +30,4 @@ unzip -q "${ARCHIVE_FILE}" || logger::err "Failed to extract Bitwarden Secrets M
 # Install binary
 install -m 755 bws "${BWS_INSTALL_DIR}/bws" || logger::err "Failed to install Bitwarden Secrets Manager CLI"
 
-# Clean up
-rm -rf "$TMP_DIR" || true
-
 logger::log "Bitwarden Secrets Manager CLI v${BWS_VERSION} installation complete"
