@@ -8,6 +8,10 @@
 @module frp-server.bash
 @module danted-setup.bash
 
+
+bitwarden::upsert_secret "$BWS_PROJECT_ID" "onion-hostname"   "$TOR_SINGLEHOP_CONF_HS_HOSTNAME" "Tor .onion proxy hostname" || logger::err "Failed to upsert 'onion-hostname' secret"
+bitwarden::upsert_secret "$BWS_PROJECT_ID" "proxy-frp-token"  "$FRP_TOKEN"  "FRP token" || logger::err "Failed to upsert 'proxy-frp-token' secret"
+
 echo
 echo "Proxy successfully configured"
 echo "----------------------------------------"

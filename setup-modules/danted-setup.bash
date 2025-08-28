@@ -2,7 +2,6 @@
 set -Euo pipefail
 
 @module logger.bash
-@module bitwarden.bash
 
 logger::log "Installing danted"
 
