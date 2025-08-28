@@ -22,7 +22,7 @@ debian-setup-factory/
 │   ├── tor.bash                # Reusable setup modules
 │   └── veracrypt.bash
 ├── recipes/
-│   └── debian-proxy-setup.recipe  # Composition file
+│   └── dev-proxy-setup.recipe  # Composition file
 ├── dist/
 │   └── (output scripts go here)
 └── .github/workflows/
@@ -72,8 +72,8 @@ Modules should **not** include a shebang (`#!/bin/bash`) and should avoid calls 
 ## Usage
 
 ```bash
-./builder/build.bash recipes/debian-proxy-setup.recipe > dist/debian-proxy-setup.bash
-chmod +x dist/debian-proxy-setup.bash
+./builder/build.bash recipes/dev-proxy-setup.recipe > dist/dev-proxy-setup.bash
+chmod +x dist/dev-proxy-setup.bash
 ```
 
 This will create a standalone Bash script combining all modules and inline steps.

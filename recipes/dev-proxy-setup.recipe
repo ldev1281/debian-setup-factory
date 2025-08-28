@@ -2,16 +2,22 @@
 
 
 @module logger.bash
+@module bitwarden-bws-setup.bash
+@module bitwarden.bash
 @module tor-setup.bash
 @module tor-singlehop-conf.bash
 @module frp-server.bash
 @module danted-setup.bash
 
+
+bitwarden::upsert_secret "$BWS_PROJECT_ID" "proxy-hostname"   "$TOR_SINGLEHOP_CONF_HS_HOSTNAME" "Tor .onion proxy hostname" || logger::err "Failed to upsert 'proxy-hostname' secret"
+bitwarden::upsert_secret "$BWS_PROJECT_ID" "proxy-frp-token"  "$FRP_TOKEN"  "FRP token" || logger::err "Failed to upsert 'proxy-frp-token' secret"
+
 echo
 echo "Proxy successfully configured"
 echo "----------------------------------------"
-echo "FRP .onion endpoint:      $TOR_SINGLEHOP_CONF_HS_FRP_HOSTNAME:$FRP_PORT"
+echo "FRP .onion endpoint:      $TOR_SINGLEHOP_CONF_HS_HOSTNAME:$FRP_PORT"
 echo "FRP token:                $FRP_TOKEN"
 echo "----------------------------------------"
-echo "Dante .onion endpoint:    $TOR_SINGLEHOP_CONF_HS_DANTE_HOSTNAME:$DANTED_SETUP_INTERNAL_PORT"
+echo "Dante .onion endpoint:    $TOR_SINGLEHOP_CONF_HS_HOSTNAME:$DANTED_SETUP_INTERNAL_PORT"
 echo "----------------------------------------"

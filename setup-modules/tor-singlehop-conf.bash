@@ -2,6 +2,7 @@
 set -Euo pipefail
 
 @module logger.bash
+@module bitwarden.bash
 
 logger::log "Configuring tor hidden service (Single Hop)"
 
@@ -105,8 +106,7 @@ while ! test -f "$_TOR_SINGLEHOP_CONF_HS_DIR/hostname"; do
     sleep 5
 done
 
-TOR_SINGLEHOP_CONF_HS_FRP_HOSTNAME="$(cat ${_TOR_SINGLEHOP_CONF_HS_DIR}/hostname)"
-TOR_SINGLEHOP_CONF_HS_DANTE_HOSTNAME="${TOR_SINGLEHOP_CONF_HS_FRP_HOSTNAME}"
+TOR_SINGLEHOP_CONF_HS_HOSTNAME="$(cat ${_TOR_SINGLEHOP_CONF_HS_DIR}/hostname)"
 
 #
 # Done!
