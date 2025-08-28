@@ -2,6 +2,7 @@
 
 
 @module logger.bash
+@module bitwarden-bws-setup.bash
 @module bitwarden.bash
 @module tor-setup.bash
 @module tor-singlehop-conf.bash
