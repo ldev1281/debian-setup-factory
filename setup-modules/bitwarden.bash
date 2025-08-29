@@ -114,8 +114,4 @@ if [[ -n "$BWS_PROJECT_NAME" ]]; then
   fi
 fi
 
-DANTED_SETUP_INTERNAL_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-socks5h-port'"
-FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-port'"
-
-
-export BWS_PROJECT_NAME BWS_PROJECT_ID DANTED_SETUP_INTERNAL_PORT FRP_PORT
+export BWS_PROJECT_NAME BWS_PROJECT_ID
