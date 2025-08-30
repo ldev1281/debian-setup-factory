@@ -4,12 +4,12 @@
 @module logger.bash
 @module bitwarden-bws-setup.bash
 @module bitwarden.bash
-@module tor-setup.bash
-@module tor-singlehop-conf.bash
 
 DANTED_SETUP_INTERNAL_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-socks5h-port'"
 FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-port'"
 
+@module tor-setup.bash
+@module tor-singlehop-conf.bash
 @module frp-server.bash
 @module danted-setup.bash
 
