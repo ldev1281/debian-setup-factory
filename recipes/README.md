@@ -193,13 +193,7 @@ To build and run **Dev Prod Backup Restore**:
    chmod +x dist/dev-prod-backup-restore.bash
    ```
 
-9. **Optionally prepare ASCII-armored GPG private and public keys** (see Notes):
-   ```
-   /tmp/privkey.asc
-   /tmp/pubkey.asc
-   ```
-
-10. **Run the script**:
+9. **Run the script**:
    ```
    ./dist/dev-prod-backup-restore.bash
    ```
@@ -210,7 +204,3 @@ To build and run **Dev Prod Backup Restore**:
 >
 > During execution, the script can optionally use private GPG key to decrypt the backup
 > and import your public GPG key for later use (backup encryption).
->
-> If you want to use GPG to decrypt the backup,
-> prepare your private and public GPG keys
-> and store them in a temporary folder.

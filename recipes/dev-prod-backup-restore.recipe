@@ -23,6 +23,9 @@ if ((${#missed_tools[@]})); then
     exit 127
 fi
 
+# Include other modules only after checking for required tools
+@module bitwarden.bash
+
 # Trap function to be used for deleting imported private key in case of failed/interrupted script
 cleanup_gpg_secret() {
     if [[ -n "${GPG_PRIV_FINGERPRINT:-}" ]]; then
@@ -38,63 +41,65 @@ read -p "Do you want to restore the server from a backup now? (yes/no) [${RESTOR
 RESTORE_FROM_BACKUP=${input:-${RESTORE_FROM_BACKUP:-yes}}
 
 if [[ "${RESTORE_FROM_BACKUP,,}" == "yes" ]]; then
-    # ==== GPG (optional) ====
     RESTORE_CONFIG_FILE="/etc/limbo-backup/restore.conf.bash"
     GPG_ENABLED=0
     GPG_PRIV_FINGERPRINT=""
     GPG_PUB_FINGERPRINT=""
 
+    : "${BW_BACKUP_PRIVKEY_SECRET:=backup-privkey}"
+    : "${BW_BACKUP_PUBKEY_SECRET:=backup-pubkey}"
+
     read -p "Use GPG for restore/decryption? (yes/no) [${GPG_ENABLE:-yes}]: " input
     GPG_ENABLE=${input:-${GPG_ENABLE:-yes}}
 
+    # ==== GPG (optional) ====
     if [[ "${GPG_ENABLE,,}" == "yes" ]]; then
-        # 1) Import PRIVATE key (temporary; will be removed after restore)
-        while :; do
-            read -p "Path to ASCII-armored PRIVATE key (.asc) for decryption: " GPG_PRIVKEY_PATH
-            if [[ -f "$GPG_PRIVKEY_PATH" ]]; then
-                GPG_PRIV_FINGERPRINT=$(gpg --with-colons --import-options show-only --import "$GPG_PRIVKEY_PATH" 2>/dev/null | awk -F: '/^fpr:/{print $10; exit}')
-                if [[ -z "$GPG_PRIV_FINGERPRINT" ]]; then
-                    echo "Could not read a fingerprint from the provided key. Please provide a valid ASCII-armored private key."
-                else
-                    echo "Importing private key into keyring (temporary)..."
-                    gpg --batch --import "$GPG_PRIVKEY_PATH" || {
-                        echo "Private key import failed"
-                        break
-                    }
-                    echo "GPG private key imported. Fingerprint: $GPG_PRIV_FINGERPRINT"
-                    # Arrange for private key cleanup after script ends or has been terminated (best-effort)
-                    trap cleanup_gpg_secret SIGINT SIGTERM EXIT
-                    break
-                fi
-            else
-                echo "File not found: $GPG_PRIVKEY_PATH"
-            fi
-        done
+        echo "Fetching GPG keys from Bitwarden project: ${BWS_PROJECT_ID:-<unset>}"
 
-        # 2) Import PUBLIC key (will remain in the system for future backup encryption)
-        while :; do
-            read -p "Path to ASCII-armored PUBLIC key (.asc) to keep in the system: " GPG_PUBKEY_PATH
-            if [[ -f "$GPG_PUBKEY_PATH" ]]; then
-                GPG_PUB_FINGERPRINT=$(gpg --with-colons --import-options show-only --import "$GPG_PUBKEY_PATH" 2>/dev/null | awk -F: '/^fpr:/{print $10; exit}')
-                if [[ -z "$GPG_PUB_FINGERPRINT" ]]; then
-                    echo "Could not read a fingerprint from the provided key. Please provide a valid ASCII-armored public key."
-                else
-                    echo "Importing public key into keyring..."
-                    gpg --batch --import "$GPG_PUBKEY_PATH" || {
-                        echo "Public key import failed"
-                        break
-                    }
-                    GPG_ENABLED=1
-                    echo "GPG public key imported. Fingerprint: $GPG_PUB_FINGERPRINT"
-                    break
-                fi
-            else
-                echo "File not found: $GPG_PUBKEY_PATH"
-            fi
-        done
+        if ! BW_GPG_PRIV_ASCII="$(bitwarden::get_secret "$BW_BACKUP_PRIVKEY_SECRET" "${BWS_PROJECT_ID:-}")" || [[ -z "$BW_GPG_PRIV_ASCII" ]]; then
+            echo "Bitwarden secret \"$BW_BACKUP_PRIVKEY_SECRET\" not found or empty"
+            exit 1
+        fi
+
+        if ! GPG_PRIV_FINGERPRINT="$(
+            printf '%s' "$BW_GPG_PRIV_ASCII" |
+                gpg --batch --import-options show-only --with-colons --import 2>/dev/null |
+                awk -F: '/^fpr:/{print $10; exit}'
+        )" || [[ -z "$GPG_PRIV_FINGERPRINT" ]]; then
+            echo "Unable to read private key fingerprint from Bitwarden secret \"$BW_BACKUP_PRIVKEY_SECRET\""
+            exit 1
+        fi
+
+        printf '%s' "$BW_GPG_PRIV_ASCII" | gpg --batch --yes --import || {
+            echo "Private key import failed"
+            exit 1
+        }
+        trap cleanup_gpg_secret SIGINT SIGTERM EXIT
+        echo "GPG private key imported. Fingerprint: $GPG_PRIV_FINGERPRINT"
+
+        if BW_GPG_PUB_ASCII="$(bitwarden::get_secret "$BW_BACKUP_PUBKEY_SECRET" "${BWS_PROJECT_ID:-}")" && [[ -n "$BW_GPG_PUB_ASCII" ]]; then
+            GPG_PUB_FINGERPRINT="$(
+                printf '%s' "$BW_GPG_PUB_ASCII" |
+                    gpg --batch --import-options show-only --with-colons --import 2>/dev/null |
+                    awk -F: '/^fpr:/{print $10; exit}'
+            )" || true
+
+            printf '%s' "$BW_GPG_PUB_ASCII" | gpg --batch --yes --import || {
+                echo "Public key import failed (continuing without public key)"
+            }
+
+            [[ -n "$GPG_PUB_FINGERPRINT" ]] && echo "GPG public key imported. Fingerprint: $GPG_PUB_FINGERPRINT"
+        else
+            echo "Bitwarden secret \"$BW_BACKUP_PUBKEY_SECRET\" not set; continuing without public key"
+        fi
+
+        GPG_ENABLED=1
     fi
-
     # ==== end GPG (optional) ====
+
+    RESTORE_CONFIG_LINES=(
+        "GPG_ENABLED=${GPG_ENABLED}"
+    )
 
     while :; do
         read -p "Enter backup URL or local path (supports http://, https://, file://, or a local path) [${BACKUP_SOURCE:-}]: " input
