@@ -7,6 +7,7 @@
 @module veracrypt-setup.bash
 @module backup-tool-setup.bash
 @module bitwarden-bws-setup.bash
+@module bitwarden.bash
 
 # === Backup-tool (limbo-backup) interactive configuration ===
 
@@ -22,29 +23,33 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
     read -p "Use GPG encryption for backups? (yes/no) [${GPG_ENABLE:-yes}]: " input
     GPG_ENABLE=${input:-${GPG_ENABLE:-yes}}
     GPG_ENABLED=0
-    GPG_FINGERPRINT=""
+    GPG_PUB_FINGERPRINT=""
+
+    : "${BW_BACKUP_PUBKEY_SECRET:=backup-pubkey}"
+
     if [[ "${GPG_ENABLE,,}" == "yes" ]]; then
-        while :; do
-            read -p "Path to ASCII-armored public GPG key file [.asc]: " GPG_PUBKEY_PATH
-            if [[ -f "$GPG_PUBKEY_PATH" ]]; then
-                # Derive fingerprint FIRST (without importing), then import into the current user's keyring (this script runs as root).
-                GPG_FINGERPRINT=$(gpg --with-colons --import-options show-only --import "$GPG_PUBKEY_PATH" 2>/dev/null | awk -F: '/^fpr:/{print $10; exit}')
-                if [[ -z "$GPG_FINGERPRINT" ]]; then
-                    echo "Could not read a fingerprint from the provided key. Please provide a valid ASCII-armored public key."
-                else
-                    echo "Importing public key into keyring..."
-                    gpg --batch --import "$GPG_PUBKEY_PATH" || {
-                        echo "Public key import failed"
-                        break
-                    }
-                    GPG_ENABLED=1
-                    echo "GPG public key imported. Fingerprint: $GPG_FINGERPRINT"
-                    break
-                fi
-            else
-                echo "File not found: $GPG_PUBKEY_PATH"
-            fi
-        done
+        echo "Fetching GPG keys from Bitwarden project: ${BWS_PROJECT_ID:-<unset>}"
+
+        if ! BW_GPG_PUB_ASCII="$(bitwarden::get_secret "$BW_BACKUP_PUBKEY_SECRET" "${BWS_PROJECT_ID:-}")" || [[ -z "$BW_GPG_PUB_ASCII" ]]; then
+            echo "Bitwarden secret \"$BW_BACKUP_PUBKEY_SECRET\" not found or empty"
+            exit 1
+        fi
+
+        if ! GPG_PUB_FINGERPRINT="$(
+            printf '%s' "$BW_GPG_PUB_ASCII" |
+                gpg --batch --import-options show-only --with-colons --import 2>/dev/null |
+                awk -F: '/^fpr:/{print $10; exit}'
+        )" || [[ -z "$GPG_PUB_FINGERPRINT" ]]; then
+            echo "Unable to read public key fingerprint from Bitwarden secret \"$BW_BACKUP_PUBKEY_SECRET\""
+            exit 1
+        fi
+
+        printf '%s' "$BW_GPG_PUB_ASCII" | gpg --batch --yes --import || {
+            echo "Public key import failed"
+            exit 1
+        }
+        GPG_ENABLED=1
+        echo "GPG public key imported. Fingerprint: $GPG_PUB_FINGERPRINT"
     fi
 
     while :; do
@@ -75,7 +80,7 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
 
         BACKUP_CONFIG_LINES=(
             "GPG_ENABLED=${GPG_ENABLED}"
-            "GPG_FINGERPRINT=\"${GPG_FINGERPRINT}\""
+            "GPG_FINGERPRINT=\"${GPG_PUB_FINGERPRINT}\""
             "RCLONE_ENABLED=1"
             "RCLONE_PROTO=\"sftp\""
             "RCLONE_SFTP_REMOTE_PATH=\"${RCLONE_SFTP_REMOTE_PATH}\""
@@ -113,7 +118,7 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
 
         BACKUP_CONFIG_LINES=(
             "GPG_ENABLED=${GPG_ENABLED}"
-            "GPG_FINGERPRINT=\"${GPG_FINGERPRINT}\""
+            "GPG_FINGERPRINT=\"${GPG_PUB_FINGERPRINT}\""
             "RCLONE_ENABLED=1"
             "RCLONE_PROTO=\"s3\""
             "RCLONE_S3_PROVIDER=\"${RCLONE_S3_PROVIDER}\""

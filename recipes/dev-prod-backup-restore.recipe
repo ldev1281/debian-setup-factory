@@ -42,6 +42,10 @@ RESTORE_FROM_BACKUP=${input:-${RESTORE_FROM_BACKUP:-yes}}
 
 if [[ "${RESTORE_FROM_BACKUP,,}" == "yes" ]]; then
     RESTORE_CONFIG_FILE="/etc/limbo-backup/restore.conf.bash"
+
+    # ==== GPG (optional) ====
+    read -p "Use GPG for restore/decryption? (yes/no) [${GPG_ENABLE:-yes}]: " input
+    GPG_ENABLE=${input:-${GPG_ENABLE:-yes}}
     GPG_ENABLED=0
     GPG_PRIV_FINGERPRINT=""
     GPG_PUB_FINGERPRINT=""
@@ -49,10 +53,6 @@ if [[ "${RESTORE_FROM_BACKUP,,}" == "yes" ]]; then
     : "${BW_BACKUP_PRIVKEY_SECRET:=backup-privkey}"
     : "${BW_BACKUP_PUBKEY_SECRET:=backup-pubkey}"
 
-    read -p "Use GPG for restore/decryption? (yes/no) [${GPG_ENABLE:-yes}]: " input
-    GPG_ENABLE=${input:-${GPG_ENABLE:-yes}}
-
-    # ==== GPG (optional) ====
     if [[ "${GPG_ENABLE,,}" == "yes" ]]; then
         echo "Fetching GPG keys from Bitwarden project: ${BWS_PROJECT_ID:-<unset>}"
 

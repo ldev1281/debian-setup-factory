@@ -116,11 +116,7 @@ To build and run **Dev Prod Init**:
    ```bash
    chmod +x dist/dev-prod-init.bash
    ```
-9. **Optionally prepare ASCII-armored GPG public key** (see Notes):
-   ```
-   /tmp/pubkey.asc
-   ```
-10. **Run the script**:
+9. **Run the script**:
    ```bash
    ./dist/dev-prod-init.bash
    ```
@@ -128,8 +124,6 @@ To build and run **Dev Prod Init**:
 > **Note (backup module):**
 >
 > During execution, the script can optionally install and configure the **backup-tool** module (SFTP/S3).
->
-> If you want to use GPG encryption for backups, prepare your public GPG key and store it in a temporary folder.
 >
 > Configuration is saved to:
 > ```
