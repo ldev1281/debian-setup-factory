@@ -4,11 +4,14 @@
 @module logger.bash
 @module bitwarden-bws-setup.bash
 @module bitwarden.bash
+
+DANTED_SETUP_INTERNAL_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-socks5h-port'"
+FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-port'"
+
 @module tor-setup.bash
 @module tor-singlehop-conf.bash
 @module frp-server.bash
 @module danted-setup.bash
-
 
 bitwarden::upsert_secret "$BWS_PROJECT_ID" "proxy-hostname"   "$TOR_SINGLEHOP_CONF_HS_HOSTNAME" "Tor .onion proxy hostname" || logger::err "Failed to upsert 'proxy-hostname' secret"
 bitwarden::upsert_secret "$BWS_PROJECT_ID" "proxy-frp-token"  "$FRP_TOKEN"  "FRP token" || logger::err "Failed to upsert 'proxy-frp-token' secret"
