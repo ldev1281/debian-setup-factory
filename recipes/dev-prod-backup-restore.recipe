@@ -50,8 +50,8 @@ if [[ "${RESTORE_FROM_BACKUP,,}" == "yes" ]]; then
     GPG_PRIV_FINGERPRINT=""
     GPG_PUB_FINGERPRINT=""
 
-    : "${BW_BACKUP_PRIVKEY_SECRET:=backup-privkey}"
-    : "${BW_BACKUP_PUBKEY_SECRET:=backup-pubkey}"
+    : "${BW_BACKUP_PRIVKEY_SECRET:=backup-gpg-private-key}"
+    : "${BW_BACKUP_PUBKEY_SECRET:=backup-gpg-public-key}"
 
     if [[ "${GPG_ENABLE,,}" == "yes" ]]; then
         echo "Fetching GPG keys from Bitwarden project: ${BWS_PROJECT_ID:-<unset>}"

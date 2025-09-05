@@ -25,7 +25,7 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
     GPG_ENABLED=0
     GPG_PUB_FINGERPRINT=""
 
-    : "${BW_BACKUP_PUBKEY_SECRET:=backup-pubkey}"
+    : "${BW_BACKUP_PUBKEY_SECRET:=backup-gpg-public-key}"
 
     if [[ "${GPG_ENABLE,,}" == "yes" ]]; then
         echo "Fetching GPG keys from Bitwarden project: ${BWS_PROJECT_ID:-<unset>}"
@@ -63,20 +63,15 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
     done
 
     if [[ "$RCLONE_PROTO" == "sftp" ]]; then
-        read -p "RCLONE_SFTP_REMOTE_PATH [${RCLONE_SFTP_REMOTE_PATH:-backups}]: " input
-        RCLONE_SFTP_REMOTE_PATH=${input:-${RCLONE_SFTP_REMOTE_PATH:-backups}}
+        RCLONE_SFTP_REMOTE_PATH="$(bitwarden::get_secret 'backup-sftp-remote-path' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-sftp-remote-path'"
 
-        read -p "RCLONE_SFTP_HOST [${RCLONE_SFTP_HOST:-your.remote.host}]: " input
-        RCLONE_SFTP_HOST=${input:-${RCLONE_SFTP_HOST:-your.remote.host}}
+        RCLONE_SFTP_HOST="$(bitwarden::get_secret 'backup-sftp-host' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-sftp-host'"
 
-        read -p "RCLONE_SFTP_PORT [${RCLONE_SFTP_PORT:-22}]: " input
-        RCLONE_SFTP_PORT=${input:-${RCLONE_SFTP_PORT:-22}}
+        RCLONE_SFTP_PORT="$(bitwarden::get_secret 'backup-sftp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-sftp-port'"
 
-        read -p "RCLONE_SFTP_USER [${RCLONE_SFTP_USER:-backupuser}]: " input
-        RCLONE_SFTP_USER=${input:-${RCLONE_SFTP_USER:-backupuser}}
+        RCLONE_SFTP_USER="$(bitwarden::get_secret 'backup-sftp-user' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-sftp-user'"
 
-        read -p "RCLONE_SFTP_PASS [${RCLONE_SFTP_PASS:-}]: " input
-        RCLONE_SFTP_PASS=${input:-${RCLONE_SFTP_PASS:-}}
+        RCLONE_SFTP_PASS="$(bitwarden::get_secret 'backup-sftp-pass' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-sftp-pass'"
 
         BACKUP_CONFIG_LINES=(
             "GPG_ENABLED=${GPG_ENABLED}"
@@ -98,20 +93,15 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
         read -p "RCLONE_S3_PROVIDER [${RCLONE_S3_PROVIDER:-AWS}]: " input
         RCLONE_S3_PROVIDER=${input:-${RCLONE_S3_PROVIDER:-AWS}}
 
-        read -p "RCLONE_S3_REMOTE_PATH [${RCLONE_S3_REMOTE_PATH:-backups}]: " input
-        RCLONE_S3_REMOTE_PATH=${input:-${RCLONE_S3_REMOTE_PATH:-backups}}
+        RCLONE_S3_REMOTE_PATH="$(bitwarden::get_secret 'backup-s3-remote-path' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-s3-remote-path'"
 
-        read -p "RCLONE_S3_ENDPOINT [${RCLONE_S3_ENDPOINT:-s3.example.com}]: " input
-        RCLONE_S3_ENDPOINT=${input:-${RCLONE_S3_ENDPOINT:-s3.example.com}}
+        RCLONE_S3_ENDPOINT="$(bitwarden::get_secret 'backup-s3-endpoint' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-s3-endpoint'"
 
-        read -p "RCLONE_S3_BUCKET [${RCLONE_S3_BUCKET:-}]: " input
-        RCLONE_S3_BUCKET=${input:-${RCLONE_S3_BUCKET:-}}
+        RCLONE_S3_BUCKET="$(bitwarden::get_secret 'backup-s3-bucket' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-s3-bucket'"
 
-        read -p "RCLONE_S3_KEY [${RCLONE_S3_KEY:-}]: " input
-        RCLONE_S3_KEY=${input:-${RCLONE_S3_KEY:-}}
+        RCLONE_S3_KEY="$(bitwarden::get_secret 'backup-s3-key' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-s3-key'"
 
-        read -p "RCLONE_S3_SECRET [${RCLONE_S3_SECRET:-}]: " input
-        RCLONE_S3_SECRET=${input:-${RCLONE_S3_SECRET:-}}
+        RCLONE_S3_SECRET="$(bitwarden::get_secret 'backup-s3-secret' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-s3-secret'"
 
         read -p "RCLONE_S3_NO_CHECK_BUCKET [${RCLONE_S3_NO_CHECK_BUCKET:-true}]: " input
         RCLONE_S3_NO_CHECK_BUCKET=${input:-${RCLONE_S3_NO_CHECK_BUCKET:-true}}
@@ -134,8 +124,7 @@ if [[ "${CONFIGURE_BACKUP_TOOL,,}" == "yes" ]]; then
         )
 
         if [[ "${RCLONE_S3_PROVIDER,,}" == "aws" ]]; then
-            read -p "RCLONE_S3_REGION [${RCLONE_S3_REGION:-}]: " input
-            RCLONE_S3_REGION=${input:-${RCLONE_S3_REGION:-}}
+            RCLONE_S3_REGION="$(bitwarden::get_secret 'backup-s3-region' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'backup-s3-region'"
 
             read -p "RCLONE_S3_STORAGE_CLASS [${RCLONE_S3_STORAGE_CLASS:-STANDARD}]: " input
             RCLONE_S3_STORAGE_CLASS=${input:-${RCLONE_S3_STORAGE_CLASS:-STANDARD}}
