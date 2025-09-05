@@ -297,3 +297,83 @@ After execution, the following endpoints are available (all bound to `127.0.0.1`
 - **SMTP relay**: `127.0.0.1:${THREEPROXY_SETUP_SMTP_INTERNAL_PORT}`  
 
 ---
+
+## bitwarden-bw-setup.bash — Bitwarden CLI Install Module
+
+### Description
+
+The `bitwarden-bw-setup.bash` module installs the **Bitwarden CLI** on a Debian-based system.  
+It handles downloading the official release archive, extracting it, and installing the `bw` binary into the system path.  
+All actions are logged via the `logger.bash` module, and the script ensures required dependencies are present.  
+
+This module is intended for automation flows or provisioning steps where command-line access to Bitwarden secrets is required.
+
+### Configuration Variables
+
+| Variable           | Description                                      | Default          |
+|--------------------|--------------------------------------------------|------------------|
+| `BW_VERSION`       | Version of Bitwarden CLI to install              | `1.22.1`         |
+| `BW_INSTALL_DIR`   | Directory to place the `bw` binary               | `/usr/local/bin` |
+
+### Usage Example
+
+```bash
+@module bitwarden-bw-setup.bash
+```
+
+After execution, the `bw` command is available globally and can be used to authenticate, manage, and retrieve secrets from a Bitwarden vault.
+
+---
+
+## bitwarden-bws-setup.bash — Bitwarden Secrets Manager CLI Install Module
+
+### Description
+
+The `bitwarden-bws-setup.bash` module installs the **Bitwarden Secrets Manager CLI (bws)** on a Debian-based system.  
+It handles downloading the official release archive, extracting it, and installing the `bws` binary into the system path.  
+All actions are logged via the `logger.bash` module, and the script ensures required dependencies are present.  
+
+This module is intended for automation flows or provisioning steps where command-line access to Bitwarden Secrets Manager is required.
+
+### Configuration Variables
+
+| Variable           | Description                                            | Default          |
+|--------------------|--------------------------------------------------------|------------------|
+| `BWS_VERSION`      | Version of Bitwarden Secrets Manager CLI to install    | `1.0.0`          |
+| `BWS_INSTALL_DIR`  | Directory to place the `bws` binary                    | `/usr/local/bin` |
+
+### Usage Example
+
+```bash
+@module bitwarden-bws-setup.bash
+```
+
+After execution, the `bws` command is available globally and can be used to authenticate and interact with Bitwarden Secrets Manager.
+
+---
+
+## bitwarden.bash — Bitwarden Helpers Module
+
+### Description
+
+The `bitwarden.bash` module provides helper functions for working with **Bitwarden CLI (`bw`)** and **Bitwarden Secrets Manager CLI (`bws`)**.  
+It simplifies listing projects and secrets, retrieving values, and creating or updating secrets.  
+All operations are logged through the `logger.bash` module.  
+
+The module also supports interactive initialization of `BWS_ACCESS_TOKEN` and optional project selection by name.
+
+
+### Configuration Variables
+
+| Variable             | Description                                      | Default   |
+|----------------------|--------------------------------------------------|-----------|
+| `BWS_ACCESS_TOKEN`   | Access token for Bitwarden Secrets Manager API   | required  |
+| `BWS_PROJECT_NAME`   | Project name for scoping secrets                 | required  |
+
+### Usage Example
+
+```bash
+@module bitwarden.bash
+```
+
+After execution, environment variables `BWS_ACCESS_TOKEN`, `BWS_PROJECT_NAME` are exported for use in subsequent commands and functions.
