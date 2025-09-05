@@ -297,3 +297,119 @@ After execution, the following endpoints are available (all bound to `127.0.0.1`
 - **SMTP relay**: `127.0.0.1:${THREEPROXY_SETUP_SMTP_INTERNAL_PORT}`  
 
 ---
+
+## bitwarden-bw-setup.bash — Bitwarden CLI Install Module
+
+### Description
+
+The `bitwarden-bw-setup.bash` module installs the **Bitwarden CLI** on a Debian-based system.  
+It handles downloading the official release archive, extracting it, and installing the `bw` binary into the system path.  
+All actions are logged via the `logger.bash` module, and the script ensures required dependencies are present.  
+
+This module is intended for automation flows or provisioning steps where command-line access to Bitwarden secrets is required.
+
+### Configuration Variables
+
+| Variable           | Description                                      | Default          |
+|--------------------|--------------------------------------------------|------------------|
+| `BW_VERSION`       | Version of Bitwarden CLI to install              | `1.22.1`         |
+| `BW_INSTALL_DIR`   | Directory to place the `bw` binary               | `/usr/local/bin` |
+
+### Usage Example
+
+```bash
+@module bitwarden-bw-setup.bash
+```
+
+After execution, the `bw` command is available globally and can be used to authenticate, manage, and retrieve secrets from a Bitwarden vault.
+
+---
+
+## bitwarden-bws-setup.bash — Bitwarden Secrets Manager CLI Install Module
+
+### Description
+
+The `bitwarden-bws-setup.bash` module installs the **Bitwarden Secrets Manager CLI (bws)** on a Debian-based system.  
+It handles downloading the official release archive, extracting it, and installing the `bws` binary into the system path.  
+All actions are logged via the `logger.bash` module, and the script ensures required dependencies are present.  
+
+This module is intended for automation flows or provisioning steps where command-line access to Bitwarden Secrets Manager is required.
+
+### Configuration Variables
+
+| Variable           | Description                                            | Default          |
+|--------------------|--------------------------------------------------------|------------------|
+| `BWS_VERSION`      | Version of Bitwarden Secrets Manager CLI to install    | `1.0.0`          |
+| `BWS_INSTALL_DIR`  | Directory to place the `bws` binary                    | `/usr/local/bin` |
+
+### Usage Example
+
+```bash
+@module bitwarden-bws-setup.bash
+```
+
+After execution, the `bws` command is available globally and can be used to authenticate and interact with Bitwarden Secrets Manager.
+
+---
+
+# Bitwarden Helpers Module (`bitwarden.bash`)
+
+## Description
+
+The `bitwarden.bash` module provides helper functions for working with **Bitwarden CLI (`bw`)** and **Bitwarden Secrets Manager CLI (`bws`)**.  
+It simplifies listing projects and secrets, retrieving secret values by key or id, and creating/updating secrets.  
+All operations are logged via `logger.bash`.
+
+## Prerequisites
+
+1. Access to **Bitwarden Secrets Manager**:  
+   - Web Vault (US): [https://vault.bitwarden.com/](https://vault.bitwarden.com/)  
+   - Web Vault (EU): [https://vault.bitwarden.eu/](https://vault.bitwarden.eu/)  
+
+2. A **Project** in Secrets Manager to store the required secrets. This project is used as `BWS_PROJECT_NAME`.
+
+3. One or more **Machine Accounts** with access to that Project:
+   - `server-stage` — backend access.
+   - `server-stage-proxy` — proxy access.
+
+4. For each machine account, create an **Access Token**. This token is used as `BWS_ACCESS_TOKEN`.
+
+5. The CLI tools `bw` and `bws` must be installed:
+   - `bitwarden-bw-setup.bash` — installs Bitwarden CLI (`bw`).
+   - `bitwarden-bws-setup.bash` — installs Bitwarden Secrets Manager CLI (`bws`).
+
+## Configuration Variables
+
+| Variable            | Description                                          | Where to obtain                                                                 |
+|---------------------|------------------------------------------------------|---------------------------------------------------------------------------------|
+| `BWS_ACCESS_TOKEN`  | Machine Account Access Token for Secrets Manager     | Web Vault → Organization → Secrets Manager → Machine Accounts → Access Tokens   |
+| `BWS_PROJECT_NAME`  | Optional project name for scoping secrets            | Create the project in Web Vault and use its name                                |
+
+When the module starts, it prompts for `BWS_ACCESS_TOKEN` and optionally `BWS_PROJECT_NAME`.
+
+## Required secrets
+
+The following secrets must be created inside the chosen Bitwarden Project. Keys are case sensitive.
+
+| Key                 | Purpose / usage                                         | Example / format                                               |
+|---------------------|---------------------------------------------------------|----------------------------------------------------------------|
+| `backup-privkey`    | **GPG private key** used to decrypt/sign backups         | ASCII-armored private key block (`-----BEGIN PGP PRIVATE KEY`) |
+| `backup-pubkey`     | **GPG public key** used to encrypt backups              | ASCII-armored public key block (`-----BEGIN PGP PUBLIC KEY`)   |
+| `proxy-frp-port`    | TCP port for FRP server/client                          | `7000`                                                         |
+| `proxy-frp-token`   | Authentication token for FRP                            | Random string (32–64 chars)                                    |
+| `proxy-hostname`    | Hostname used by proxy/FRP endpoints                    | `proxy.stage.example.com`                                      |
+| `proxy-socks5h-port`| Local SOCKS5h proxy port                                | `1080`                                                         |
+
+
+## Usage example
+
+```bash
+@module bitwarden.bash
+
+# On start, the module prompts for:
+# 1. BWS_ACCESS_TOKEN (required)
+# 2. BWS_PROJECT_NAME (optional; resolves BWS_PROJECT_ID)
+
+If access is denied, regenerate the **Access Token** for the Machine Account in Web Vault and set it as `BWS_ACCESS_TOKEN`.  
+
+---
