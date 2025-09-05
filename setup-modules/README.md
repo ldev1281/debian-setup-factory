@@ -352,28 +352,64 @@ After execution, the `bws` command is available globally and can be used to auth
 
 ---
 
-## bitwarden.bash — Bitwarden Helpers Module
+# Bitwarden Helpers Module (`bitwarden.bash`)
 
-### Description
+## Description
 
 The `bitwarden.bash` module provides helper functions for working with **Bitwarden CLI (`bw`)** and **Bitwarden Secrets Manager CLI (`bws`)**.  
-It simplifies listing projects and secrets, retrieving values, and creating or updating secrets.  
-All operations are logged through the `logger.bash` module.  
+It simplifies listing projects and secrets, retrieving secret values by key or id, and creating/updating secrets.  
+All operations are logged via `logger.bash`.
 
-The module also supports interactive initialization of `BWS_ACCESS_TOKEN` and optional project selection by name.
+## Prerequisites
+
+1. Access to **Bitwarden Secrets Manager**:  
+   - Web Vault (US): [https://vault.bitwarden.com/](https://vault.bitwarden.com/)  
+   - Web Vault (EU): [https://vault.bitwarden.eu/](https://vault.bitwarden.eu/)  
+
+2. A **Project** in Secrets Manager to store the required secrets. This project is used as `BWS_PROJECT_NAME`.
+
+3. One or more **Machine Accounts** with access to that Project:
+   - `server-stage` — backend access.
+   - `server-stage-proxy` — proxy access.
+
+4. For each machine account, create an **Access Token**. This token is used as `BWS_ACCESS_TOKEN`.
+
+5. The CLI tools `bw` and `bws` must be installed:
+   - `bitwarden-bw-setup.bash` — installs Bitwarden CLI (`bw`).
+   - `bitwarden-bws-setup.bash` — installs Bitwarden Secrets Manager CLI (`bws`).
+
+## Configuration Variables
+
+| Variable            | Description                                          | Where to obtain                                                                 |
+|---------------------|------------------------------------------------------|---------------------------------------------------------------------------------|
+| `BWS_ACCESS_TOKEN`  | Machine Account Access Token for Secrets Manager     | Web Vault → Organization → Secrets Manager → Machine Accounts → Access Tokens   |
+| `BWS_PROJECT_NAME`  | Optional project name for scoping secrets            | Create the project in Web Vault and use its name                                |
+
+When the module starts, it prompts for `BWS_ACCESS_TOKEN` and optionally `BWS_PROJECT_NAME`.
+
+## Required secrets
+
+The following secrets must be created inside the chosen Bitwarden Project. Keys are case sensitive.
+
+| Key                 | Purpose / usage                                         | Example / format                                               |
+|---------------------|---------------------------------------------------------|----------------------------------------------------------------|
+| `backup-privkey`    | **GPG private key** used to decrypt/sign backups         | ASCII-armored private key block (`-----BEGIN PGP PRIVATE KEY`) |
+| `backup-pubkey`     | **GPG public key** used to encrypt backups              | ASCII-armored public key block (`-----BEGIN PGP PUBLIC KEY`)   |
+| `proxy-frp-port`    | TCP port for FRP server/client                          | `7000`                                                         |
+| `proxy-frp-token`   | Authentication token for FRP                            | Random string (32–64 chars)                                    |
+| `proxy-hostname`    | Hostname used by proxy/FRP endpoints                    | `proxy.stage.example.com`                                      |
+| `proxy-socks5h-port`| Local SOCKS5h proxy port                                | `1080`                                                         |
 
 
-### Configuration Variables
-
-| Variable             | Description                                      | Default   |
-|----------------------|--------------------------------------------------|-----------|
-| `BWS_ACCESS_TOKEN`   | Access token for Bitwarden Secrets Manager API   | required  |
-| `BWS_PROJECT_NAME`   | Project name for scoping secrets                 | required  |
-
-### Usage Example
+## Usage example
 
 ```bash
 @module bitwarden.bash
-```
 
-After execution, environment variables `BWS_ACCESS_TOKEN`, `BWS_PROJECT_NAME` are exported for use in subsequent commands and functions.
+# On start, the module prompts for:
+# 1. BWS_ACCESS_TOKEN (required)
+# 2. BWS_PROJECT_NAME (optional; resolves BWS_PROJECT_ID)
+
+If access is denied, regenerate the **Access Token** for the Machine Account in Web Vault and set it as `BWS_ACCESS_TOKEN`.  
+
+---
