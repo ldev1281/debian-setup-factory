@@ -1,0 +1,43 @@
+#!/bin/bash
+
+@module logger.bash
+
+REQUIRED_TOOLS="docker git bws"
+
+# === Check for required tools  ===
+
+missed_tools=()
+for cmd in $REQUIRED_TOOLS; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        missed_tools+=("$cmd")
+    fi
+done
+
+if ((${#missed_tools[@]})); then
+    echo "Required tools not found:" >&2
+    for cmd in "${missed_tools[@]}"; do
+        echo "  - $cmd" >&2
+    done
+    echo "Hint: run dev-prod-init.recipe from debian-setup-factory" >&2
+    echo "Abort"
+    exit 127
+fi
+
+# Include other modules only after checking for required tools
+@module bitwarden.bash
+
+PROXY_HOST="$(bitwarden::get_secret 'proxy-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-hostname'"
+PROXY_SOCKS5H_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-socks5h-port'"
+PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-hostname'"
+PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-port'"
+PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-token'"
+
+# First install proxy-client for initial networks creation
+@module proxy-client-setup.bash
+@module authentik-setup.bash
+
+echo
+echo "Server successfully configured"
+echo "----------------------------------------"
+echo "Authentik endpoint hostname:    $PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME"
+echo "----------------------------------------"
