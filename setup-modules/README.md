@@ -391,14 +391,20 @@ When the module starts, it prompts for `BWS_ACCESS_TOKEN` and optionally `BWS_PR
 
 The following secrets must be created inside the chosen Bitwarden Project. Keys are case sensitive.
 
-| Key                 | Purpose / usage                                         | Example / format                                               |
-|---------------------|---------------------------------------------------------|----------------------------------------------------------------|
-| `backup-privkey`    | **GPG private key** used to decrypt/sign backups         | ASCII-armored private key block (`-----BEGIN PGP PRIVATE KEY`) |
-| `backup-pubkey`     | **GPG public key** used to encrypt backups              | ASCII-armored public key block (`-----BEGIN PGP PUBLIC KEY`)   |
-| `proxy-frp-port`    | TCP port for FRP server/client                          | `7000`                                                         |
-| `proxy-frp-token`   | Authentication token for FRP                            | Random string (32–64 chars)                                    |
-| `proxy-hostname`    | Hostname used by proxy/FRP endpoints                    | `proxy.stage.example.com`                                      |
-| `proxy-socks5h-port`| Local SOCKS5h proxy port                                | `1080`                                                         |
+| Key                      | Purpose / usage                                         | Example / format                                       |
+|--------------------------|---------------------------------------------------------|--------------------------------------------------------|
+| `backup-gpg-public-key`  | GPG public key (ASCII) used to encrypt backups          | ASCII-armored block (`-----BEGIN PGP PUBLIC KEY----- …`) |
+| `backup-sftp-remote-path`| Destination path for SFTP uploads                        | `/backups/host1/`                                      |
+| `backup-sftp-host`       | SFTP host                                               | `sftp.example.com`                                     |
+| `backup-sftp-port`       | SFTP port                                               | `22`                                                   |
+| `backup-sftp-user`       | SFTP username                                           | `backup`                                               |
+| `backup-sftp-pass`       | SFTP password/secret                                    | opaque secret                                          |
+| `backup-s3-remote-path`  | S3 path/prefix for uploads                              | `backups/host1/`                                       |
+| `backup-s3-endpoint`     | S3 endpoint (for non-AWS/custom S3)                     | `https://s3.example.com`                               |
+| `backup-s3-bucket`       | S3 bucket name                                          | `my-backups`                                           |
+| `backup-s3-key`          | S3 Access Key ID                                        | `AKIA…`                                                |
+| `backup-s3-secret`       | S3 Secret Access Key                                    | secret string                                          |
+| `backup-s3-region`       | AWS S3 region (when provider is `AWS`)                  | `eu-central-1`                                         |
 
 
 ## Usage example
