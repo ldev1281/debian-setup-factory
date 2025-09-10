@@ -9,6 +9,7 @@ logger::log "Installing danted"
 # Defaults
 #
 DANTED_SETUP_VERSION="${DANTED_SETUP_VERSION:-1.4.2+dfsg-7+b8}"
+DANTED_SETUP_SNAPSHOT_TIMESTAMP="${DANTED_SETUP_SNAPSHOT_TIMESTAMP:-20250815T210941Z}"
 DANTED_SETUP_INTERNAL_HOST="${DANTED_SETUP_INTERNAL_HOST:-127.0.0.1}"
 DANTED_SETUP_INTERNAL_PORT="${DANTED_SETUP_INTERNAL_PORT:-1080}"
 DANTED_SETUP_EXTERNAL_IFACE="${DANTED_SETUP_EXTERNAL_IFACE:-$(ip route | awk '/default/ {print $5}' | head -n1)}"
@@ -25,7 +26,7 @@ TMP_DIR="/tmp/danted_setup.$$"
 mkdir -p "$TMP_DIR"
 cd "$TMP_DIR" || logger::err "Failed to enter temporary directory"
 
-DEB_URL="http://ftp.debian.org/debian/pool/main/d/dante/dante-server_${DANTED_SETUP_VERSION}_amd64.deb"
+DEB_URL="https://snapshot.debian.org/archive/debian/${DANTED_SETUP_SNAPSHOT_TIMESTAMP}/pool/main/d/dante/dante-server_${DANTED_SETUP_VERSION}_amd64.deb"
 DEB_FILE="${TMP_DIR}/dante-server_${DANTED_SETUP_VERSION}_amd64.deb"
 
 curl -fsSL -o "$DEB_FILE" "$DEB_URL" || logger::err "Failed to download dante-server deb"
