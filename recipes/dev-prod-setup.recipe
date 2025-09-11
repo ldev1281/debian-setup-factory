@@ -38,6 +38,3 @@ export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_
 
 echo
 echo "Server successfully configured"
-echo "----------------------------------------"
-echo "Authentik endpoint hostname:    $PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME"
-echo "----------------------------------------"
