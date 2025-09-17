@@ -59,7 +59,7 @@ To build and run **Dev Prod Init**:
    ```
 
 > **Note:**  
-> This script should only be executed after running **dev-prod-init**,  
+> This script should only be executed after running **dev-proxy-setup**,  
 > as it relies on the server environment prepared by that recipe.  
 >
 > During execution, the script can optionally use private GPG key to decrypt the backup  
