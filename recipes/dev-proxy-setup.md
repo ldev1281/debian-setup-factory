@@ -55,8 +55,25 @@ To build and run **Dev Proxy Setup**:
    ./dist/dev-proxy-setup.bash
    ```
 
-> **Note:**  
-> Steps 7–9 can be repeated whenever you update the recipe or want to rebuild the script.
+### Required Secrets
+
+Ensure these exist in **Bitwarden Secrets Manager** project **before** running `dev-proxy-setup.recipe`:
+
+| Secret Name          | Required | Description              | Example |
+|----------------------|----------|--------------------------|---------|
+| `proxy-socks5h-port` | yes      | Dante (SOCKS) port       | `1080` |
+| `proxy-frp-port`     | yes      | FRP server port          | `7000` |
+
+**Will be created by the recipe (upsert):**
+| Secret Name        | Source (created by)          |
+|--------------------|------------------------------|
+| `proxy-hostname`   | `tor-singlehop` (Onion host) |
+| `proxy-frp-token`  | `frp-server.bash` (generated)|
+
+> **Note Secrets:** The recipe writes the generated hostname/token back to Bitwarden.
 
 > **BWS Access Reminder:**  
 > If you have any questions about access to Bitwarden Secrets Manager (BWS), how to configure Machine Accounts or tokens — see the [Bitwarden Helpers Module documentation](https://github.com/ldev1281/debian-setup-factory/blob/dev/setup-modules/README.md#bitwarden-helpers-module-bitwardenbash).
+
+> **Note:**  
+> Steps 7–9 can be repeated whenever you update the recipe or want to rebuild the script.

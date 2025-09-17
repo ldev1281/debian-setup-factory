@@ -58,6 +58,35 @@ To build and run **Dev Prod Init**:
    ./dist/dev-prod-init.bash
    ```
 
+### Required Secrets
+
+Create the following secrets in **Bitwarden Secrets Manager** project **before** running `dev-prod-init.recipe`:
+
+**GPG (optional)**
+| Secret Name             | Required      | Description |
+|-------------------------|---------------|-------------|
+| `backup-gpg-public-key` | if `GPG_ENABLE=yes` | GPG **public** key (ASCII-armored) used to encrypt backups |
+
+**Rclone / SFTP (when `RCLONE_PROTO=sftp`)**
+| Secret Name              | Required | Description                 | Example |
+|--------------------------|----------|-----------------------------|---------|
+| `backup-sftp-remote-path`| yes      | Target path on SFTP         | `/backups/prod` |
+| `backup-sftp-host`       | yes      | SFTP host                   | `sftp.example.com` |
+| `backup-sftp-port`       | yes      | SFTP port                   | `22` |
+| `backup-sftp-user`       | yes      | SFTP username               | `backupuser` |
+| `backup-sftp-pass`       | yes      | SFTP password               | `***` |
+
+**Rclone / S3 (when `RCLONE_PROTO=s3`)**
+| Secret Name            | Required | Description                                 | Example |
+|------------------------|----------|---------------------------------------------|---------|
+| `backup-s3-remote-path`| yes      | Path/prefix in bucket                       | `prod/server1/` |
+| `backup-s3-endpoint`   | yes      | S3 endpoint (non-AWS or custom)             | `https://s3.eu-central-1.amazonaws.com` |
+| `backup-s3-bucket`     | yes      | Bucket name                                 | `my-backup-bucket` |
+| `backup-s3-key`        | yes      | Access Key ID                               | `AKIA...` |
+| `backup-s3-secret`     | yes      | Secret Access Key                           | `wJalrXU...` |
+| `backup-s3-region`     | for AWS  | AWS region when `RCLONE_S3_PROVIDER=AWS`    | `eu-central-1` |
+
+
 > **Note:**  
 > This script should only be executed after running **dev-proxy-setup**,  
 > as it relies on the server environment prepared by that recipe.  

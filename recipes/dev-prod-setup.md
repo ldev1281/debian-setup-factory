@@ -54,6 +54,24 @@ To build and run **Dev Prod Setup**:
    ```bash
    ./dist/dev-prod-setup.bash
    ```
+   
+### Required Secrets
+
+You must run **`dev-proxy-setup.recipe` first**, then run **`dev-prod-setup.recipe`**.
+
+- `dev-proxy-setup` **creates** (`upsert`) the following Bitwarden secrets:
+  - `proxy-hostname` (Tor onion hostname)
+  - `proxy-frp-token` (generated token)
+
+Create the following secrets in **Bitwarden Secrets Manager** project **before** running `dev-prod-setup.recipe`:
+
+| Secret Name              | Required | Description                               | Example |
+|--------------------------|----------|-------------------------------------------|---------|
+| `proxy-hostname`         | yes      | External proxy hostname (used by client)  | `proxy.stage.example.com` |
+| `proxy-socks5h-port`     | yes      | Local SOCKS5h proxy port                  | `1080` |
+| `proxy-frp-port`         | yes      | TCP port for FRP                          | `7000` |
+| `proxy-frp-token`        | yes      | Authentication token for FRP              | `random32chars` |
+| `app-authentik-hostname` | yes      | Authentik app hostname behind proxy       | `auth.stage.example.com` |
 
 > **Note:**  
 > Steps 7–9 can be repeated whenever you update the recipe or want to rebuild the script.

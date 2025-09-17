@@ -55,6 +55,16 @@ To build and run **Dev Prod Backup Restore**:
    ./dist/dev-prod-backup-restore.bash
    ```
 
+### 🔑 Required Secrets
+
+Before running `dev-prod-backup-restore.recipe`, make sure the following secrets exist in **Bitwarden Secrets Manager** project.
+
+| Secret Name             | Required            | Description                                     | Example |
+|-------------------------|---------------------|-------------------------------------------------|---------|
+| `backup-gpg-private-key`| if `GPG_ENABLE=yes` | GPG **private** key (ASCII-armored) to decrypt backups | `-----BEGIN PGP PRIVATE KEY----- ...` |
+| `backup-gpg-public-key` | optional            | GPG **public** key (ASCII-armored); imported if present | `-----BEGIN PGP PUBLIC KEY----- ...` |
+
+
 > **Note (backup module):**  
 > During execution, the script can optionally install and configure the **backup-tool** module (SFTP/S3).  
 > Configuration is saved to:  
