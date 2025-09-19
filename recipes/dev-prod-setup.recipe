@@ -33,7 +33,7 @@ export PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-out
 export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-port'"
 export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-token'"
 
-export OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-hostname'"
+export OUTLINE_APP_HOSTNAME="$PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME"
 export OUTLINE_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-outline-authentik-client-id' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-client-id'"
 export OUTLINE_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-outline-authentik-client-secret' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-client-secret'"
 export OUTLINE_AUTHENTIK_URL="$(bitwarden::get_secret 'app-outline-authentik-url' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-url'"
