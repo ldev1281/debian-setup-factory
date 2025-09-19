@@ -36,7 +36,6 @@ for module_app in $MODULES_APPS; do
 
   case "$module_app" in
     proxy-client-setup.bash)
-      # Bitwarden vars for proxy-client
       export PROXY_HOST="$(bitwarden::get_secret 'proxy-hostname' "$BWS_PROJECT_ID")"
       export PROXY_SOCKS5H_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")"
       export PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")"
@@ -49,7 +48,6 @@ for module_app in $MODULES_APPS; do
 @module authentik-setup.bash
       ;;
     outline-setup.bash)
-      # Bitwarden vars for outline
       export OUTLINE_APP_HOSTNAME="$PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME"
       export OUTLINE_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-outline-authentik-client-id' "$BWS_PROJECT_ID")"
       export OUTLINE_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-outline-authentik-client-secret' "$BWS_PROJECT_ID")"
