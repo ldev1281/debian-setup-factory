@@ -65,13 +65,17 @@ You must run **`dev-proxy-setup.recipe` first**, then run **`dev-prod-setup.reci
 
 Create the following secrets in **Bitwarden Secrets Manager** project **before** running `dev-prod-setup.recipe`:
 
-| Secret Name              | Required | Description                               | Example |
-|--------------------------|----------|-------------------------------------------|---------|
-| `proxy-hostname`         | yes      | External proxy hostname (used by client)  | `proxy.stage.example.com` |
-| `proxy-socks5h-port`     | yes      | Local SOCKS5h proxy port                  | `1080` |
-| `proxy-frp-port`         | yes      | TCP port for FRP                          | `7000` |
-| `proxy-frp-token`        | yes      | Authentication token for FRP              | `random32chars` |
-| `app-authentik-hostname` | yes      | Authentik app hostname behind proxy       | `auth.stage.example.com` |
+| Secret Name                           | Required | Description                                    | Example                        |
+|---------------------------------------|----------|------------------------------------------------|--------------------------------|
+| `proxy-hostname`                      | yes      | External proxy hostname (used by client)       | `proxy.stage.example.com`      |
+| `proxy-socks5h-port`                  | yes      | Local SOCKS5h proxy port                       | `1080`                         |
+| `proxy-frp-port`                      | yes      | TCP port for FRP                               | `7000`                         |
+| `proxy-frp-token`                     | yes      | Authentication token for FRP                   | `random32chars`                |
+| `app-authentik-hostname`              | yes      | Authentik app hostname behind proxy            | `auth.stage.example.com`       |
+| `app-outline-hostname`                | yes      | Outline app hostname behind proxy              | `outline.stage.example.com`    |
+| `app-outline-authentik-client-id`     | yes      | Authentik OAuth2 client ID for Outline         | `outline-client-id`            |
+| `app-outline-authentik-client-secret` | yes      | Authentik OAuth2 client secret for Outline     | `supersecret`                  |
+| `app-outline-authentik-url`           | yes      | Authentik OAuth2 base URL for Outline          | `https://auth.stage.example.com` |
 
 > **Note:**  
 > Steps 7–9 can be repeated whenever you update the recipe or want to rebuild the script.
