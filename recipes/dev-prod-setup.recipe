@@ -4,6 +4,27 @@
 
 REQUIRED_TOOLS="docker git bws"
 
+# === Helpers ===
+print_authentik_next_steps() {
+  cat <<'EOF'
+
+============================================================
+Authentik has been successfully installed.
+Before proceeding with the installation of other applications, you must configure
+application authorization and single sign-on (SSO) in Authentik.
+
+This includes:
+- Creating providers and applications in the Authentik admin panel.
+- Setting up authentication flows (login, signup, etc.).
+- Generating client credentials (client ID/secret) for the apps you plan to integrate.
+
+⚠️ Important: Do not continue with further application setups until Authentik is
+properly configured to handle authentication, otherwise logins will not work.
+============================================================
+
+EOF
+}
+
 # === Check for required tools  ===
 
 missed_tools=()
@@ -46,6 +67,8 @@ for module_app in $MODULES_APPS; do
       ;;
     authentik-setup.bash)
 @module authentik-setup.bash
+      # Post-install notice for Authentik
+      print_authentik_next_steps
       ;;
     outline-setup.bash)
       export OUTLINE_APP_HOSTNAME="$PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME"
@@ -61,7 +84,7 @@ for module_app in $MODULES_APPS; do
       ;;
   esac
 
-logger::ok "$module_app: Done"
+  logger::ok "$module_app: Done"
 done
 
 echo
