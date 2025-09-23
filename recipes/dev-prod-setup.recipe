@@ -53,7 +53,7 @@ for module_app in $MODULES_APPS; do
   echo
   echo "$module_app"
   read -r -p "Install $module_app? [y/N]: " a
-  [[ "${a,,}" =~ ^(y|yes)$ ]] || { logger::warn "$module_app: skipped"; continue; }
+  [[ "${a,,}" =~ ^(y|yes)$ ]] || { echo "$module_app: skipped"; continue; }
 
   case "$module_app" in
     proxy-client-setup.bash)
