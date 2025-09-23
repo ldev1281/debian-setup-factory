@@ -84,7 +84,7 @@ for module_app in $MODULES_APPS; do
       ;;
   esac
 
-logger::ok "$module_app: Done"
+"$module_app: Done"
 done
 
 echo
