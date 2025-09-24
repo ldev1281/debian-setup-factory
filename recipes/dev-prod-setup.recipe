@@ -36,12 +36,12 @@ for module_app in $MODULES_APPS; do
 
   case "$module_app" in
     proxy-client-setup.bash)
-      export PROXY_HOST="$(bitwarden::get_secret 'proxy-hostname' "$BWS_PROJECT_ID")"
-      export PROXY_SOCKS5H_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")"
-      export PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")"
-      export PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")"
-      export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")"
-      export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")"
+export PROXY_HOST="$(bitwarden::get_secret 'proxy-hostname' "$BWS_PROJECT_ID")"
+export PROXY_SOCKS5H_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")"
+export PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")"
+export PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")"
+export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")"
+export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")"
 @module proxy-client-setup.bash
       ;;
     authentik-setup.bash)
@@ -64,10 +64,10 @@ for module_app in $MODULES_APPS; do
         echo
       ;;
     outline-setup.bash)
-      export OUTLINE_APP_HOSTNAME="$PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME"
-      export OUTLINE_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-outline-authentik-client-id' "$BWS_PROJECT_ID")"
-      export OUTLINE_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-outline-authentik-client-secret' "$BWS_PROJECT_ID")"
-      export OUTLINE_AUTHENTIK_URL="$(bitwarden::get_secret 'app-outline-authentik-url' "$BWS_PROJECT_ID")"
+export OUTLINE_APP_HOSTNAME="$PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME"
+export OUTLINE_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-outline-authentik-client-id' "$BWS_PROJECT_ID")"
+export OUTLINE_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-outline-authentik-client-secret' "$BWS_PROJECT_ID")"
+export OUTLINE_AUTHENTIK_URL="$(bitwarden::get_secret 'app-outline-authentik-url' "$BWS_PROJECT_ID")"
 
 @module outline-setup.bash
       ;;
