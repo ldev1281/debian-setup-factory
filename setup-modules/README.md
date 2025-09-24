@@ -419,3 +419,121 @@ The following secrets must be created inside the chosen Bitwarden Project. Keys 
 If access is denied, regenerate the **Access Token** for the Machine Account in Web Vault and set it as `BWS_ACCESS_TOKEN`.  
 
 ---
+
+## outline-setup.bash — Outline Install Module
+
+### Description
+
+The `outline-setup` module automates installation and initialization of the [Outline](https://www.getoutline.com) knowledge base via Docker Compose.  
+It ensures all required dependencies are installed, prepares the target directory, and manages repository cloning or updating.  
+The module then executes the bundled `init.bash` script to finalize configuration and bring up the Outline service stack.
+
+This module is designed for reproducible deployments in initialization workflows. It enforces root privileges, validates dependencies, and handles both fresh installs and updates from an existing Git repository.
+
+### Configuration Variables
+
+| Variable                         | Description                                                         | Default                                                           |
+|----------------------------------|---------------------------------------------------------------------|-------------------------------------------------------------------|
+| `OUTLINE_SETUP_REPO_URL`         | Git repository URL for Outline deployment                           | `https://github.com/ldev1281/docker-compose-outline.git`          |
+| `OUTLINE_SETUP_TARGET_PARENT_DIR`| Parent directory for Outline installation                           | `/docker`                                                         |
+| `OUTLINE_SETUP_TARGET_DIR`       | Target directory for Outline instance                               | `${OUTLINE_SETUP_TARGET_PARENT_DIR}/outline`                      |
+| `OUTLINE_SETUP_GIT_BRANCH`       | Git branch to checkout (if specified)                               | *(empty → default branch)*                                        |
+| `OUTLINE_SETUP_INIT_PATH`        | Path to initialization script executed after cloning/updating       | `./tools/init.bash`                                               |
+
+### Exported Behavior
+
+- All logs and errors are routed through the `logger.bash` module.  
+- Validates root privileges before proceeding.  
+- Installs system dependencies: **git**, **ca-certificates**, **curl**.  
+- Creates or updates the target deployment directory and clones/updates the Outline Docker Compose repository.  
+- Executes the initialization script (`init.bash`) to finalize service configuration.  
+- Provides reproducible, idempotent setup suitable for automated provisioning.  
+
+### Usage Example
+
+```bash
+@module outline-setup.bash
+```
+
+After execution, the Outline service stack is installed under the specified target directory and ready for further configuration and startup.  
+
+---
+
+## authentik-setup.bash — Authentik Install Module
+
+### Description
+
+The `authentik-setup` module automates the deployment of the [Authentik](https://goauthentik.io) identity provider using Docker Compose.  
+It installs required dependencies, prepares the target directory, and manages cloning or updating the deployment repository.  
+Finally, it executes the bundled `init.bash` script to generate environment configuration and bootstrap the Authentik service stack.
+
+This module is intended for initialization workflows where secure, reproducible provisioning of Authentik is required. It enforces root privileges, validates dependencies, and supports both fresh installs and updates of existing deployments.
+
+### Configuration Variables
+
+| Variable                           | Description                                                         | Default                                                            |
+|------------------------------------|---------------------------------------------------------------------|--------------------------------------------------------------------|
+| `AUTHENTIK_SETUP_REPO_URL`         | Git repository URL for Authentik deployment                         | `https://github.com/ldev1281/docker-compose-authentik.git`         |
+| `AUTHENTIK_SETUP_TARGET_PARENT_DIR`| Parent directory for Authentik installation                         | `/docker`                                                          |
+| `AUTHENTIK_SETUP_TARGET_DIR`       | Target directory for Authentik instance                             | `${AUTHENTIK_SETUP_TARGET_PARENT_DIR}/authentik`                   |
+| `AUTHENTIK_SETUP_GIT_BRANCH`       | Git branch to checkout (if specified)                               | *(empty → default branch)*                                         |
+| `AUTHENTIK_SETUP_INIT_PATH`        | Path to initialization script executed after cloning/updating       | `./tools/init.bash`                                                |
+
+### Exported Behavior
+
+- All logs and errors are routed through the `logger.bash` module.  
+- Validates root privileges before proceeding.  
+- Installs system dependencies: **git**, **ca-certificates**, **curl**.  
+- Creates or updates the target deployment directory and clones/updates the Authentik Docker Compose repository.  
+- Executes the initialization script (`init.bash`) to generate `.env` files and initialize database, Redis, and service configuration.  
+- Provides reproducible, idempotent setup for automated provisioning.  
+
+### Usage Example
+
+```bash
+@module authentik-setup.bash
+```
+
+After execution, the Authentik service stack is installed under the specified target directory.  
+The instance will be ready for configuration of authentication providers, flows, and single sign-on (SSO) integrations.  
+
+---
+
+## proxy-client-setup.bash — Proxy Client Install Module
+
+### Description
+
+The `proxy-client-setup` module automates the deployment of a proxy client stack using Docker Compose.  
+It prepares the system environment, ensures required dependencies are installed, and manages cloning or updating of the proxy-client repository.  
+Afterward, it executes the bundled `init.bash` script to configure and launch the proxy client containers.
+
+This module is intended for reproducible deployments in initialization workflows. It enforces root privileges, validates dependencies, and supports both fresh installs and updates from an existing Git repository.
+
+### Configuration Variables
+
+| Variable                                | Description                                                         | Default                                                                 |
+|-----------------------------------------|---------------------------------------------------------------------|-------------------------------------------------------------------------|
+| `PROXY_CLIENT_SETUP_REPO_URL`           | Git repository URL for proxy client deployment                      | `https://github.com/ldev1281/docker-compose-proxy-client.git`           |
+| `PROXY_CLIENT_SETUP_TARGET_PARENT_DIR`  | Parent directory for proxy client installation                      | `/docker`                                                               |
+| `PROXY_CLIENT_SETUP_TARGET_DIR`         | Target directory for proxy client instance                          | `${PROXY_CLIENT_SETUP_TARGET_PARENT_DIR}/proxy-client`                  |
+| `PROXY_CLIENT_SETUP_GIT_BRANCH`         | Git branch to checkout (if specified)                               | *(empty → default branch)*                                              |
+| `PROXY_CLIENT_SETUP_INIT_PATH`          | Path to initialization script executed after cloning/updating       | `./tools/init.bash`                                                     |
+
+### Exported Behavior
+
+- All logs and errors are routed through the `logger.bash` module.  
+- Validates root privileges before proceeding.  
+- Installs system dependencies: **git**, **ca-certificates**, **curl**.  
+- Creates or updates the target deployment directory and clones/updates the proxy client Docker Compose repository.  
+- Executes the initialization script (`init.bash`) to configure proxy client services and generate environment files.  
+- Provides reproducible, idempotent setup suitable for automated provisioning.  
+
+### Usage Example
+
+```bash
+@module proxy-client-setup.bash
+```
+
+After execution, the proxy client stack is installed under the specified target directory and ready to connect to the configured proxy server(s).  
+
+---
