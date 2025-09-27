@@ -31,52 +31,54 @@ MODULES_APPS="${MODULES_APPS:-proxy-client-setup.bash authentik-setup.bash outli
 for module_app in $MODULES_APPS; do
   echo
   echo "$module_app"
-  read -r -p "Install $module_app? [y/N]: " a
-  [[ "${a,,}" =~ ^(y|yes)$ ]] || { echo "$module_app: skipped"; continue; }
+  read -r -p "Install $module_app? [Y/n]: " a
+  a="${a:-y}"
 
-  case "$module_app" in
-    proxy-client-setup.bash)
-      export PROXY_HOST="$(bitwarden::get_secret 'proxy-hostname' "$BWS_PROJECT_ID")"
-      export PROXY_SOCKS5H_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")"
-      export PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")"
-      export PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")"
-      export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")"
-      export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")"
+  if [[ "${a,,}" =~ ^(y|yes)$ ]]; then
+    case "$module_app" in
+      proxy-client-setup.bash)
+        export PROXY_HOST="$(bitwarden::get_secret 'proxy-hostname' "$BWS_PROJECT_ID")"
+        export PROXY_SOCKS5H_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")"
+        export PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")"
+        export PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")"
+        export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")"
+        export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")"
 @module proxy-client-setup.bash
-      ;;
-    authentik-setup.bash)
+        ;;
+      authentik-setup.bash)
 @module authentik-setup.bash
-      # Post-install notice for Authentik
-      echo
-      echo "============================================================"
-      echo "Authentik has been successfully installed."
-      echo "Before proceeding with the installation of other applications, you must configure"
-      echo "application authorization and single sign-on (SSO) in Authentik."
-      echo
-      echo "This includes:"
-      echo "- Creating providers and applications in the Authentik admin panel."
-      echo "- Setting up authentication flows (login, signup, etc.)."
-      echo "- Generating client credentials (client ID/secret) for the apps you plan to integrate."
-      echo
-      echo "⚠️ Important: Do not continue with further application setups until Authentik is"
-      echo "properly configured to handle authentication, otherwise logins will not work."
-      echo "============================================================"
-      echo
-      ;;
-    outline-setup.bash)
-      export OUTLINE_APP_HOSTNAME="$PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME"
-      export OUTLINE_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-outline-authentik-client-id' "$BWS_PROJECT_ID")"
-      export OUTLINE_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-outline-authentik-client-secret' "$BWS_PROJECT_ID")"
-      export OUTLINE_AUTHENTIK_URL="$(bitwarden::get_secret 'app-outline-authentik-url' "$BWS_PROJECT_ID")"
+        # Post-install notice for Authentik
+        echo
+        echo "============================================================"
+        echo "Authentik has been successfully installed."
+        echo "Before proceeding with the installation of other applications, you must configure"
+        echo "application authorization and single sign-on (SSO) in Authentik."
+        echo
+        echo "This includes:"
+        echo "- Creating providers and applications in the Authentik admin panel."
+        echo "- Setting up authentication flows (login, signup, etc.)."
+        echo "- Generating client credentials (client ID/secret) for the apps you plan to integrate."
+        echo
+        echo "⚠️ Important: Do not continue with further application setups until Authentik is"
+        echo "properly configured to handle authentication, otherwise logins will not work."
+        echo "============================================================"
+        echo
+        ;;
+      outline-setup.bash)
+        export OUTLINE_APP_HOSTNAME="$PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME"
+        export OUTLINE_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-outline-authentik-client-id' "$BWS_PROJECT_ID")"
+        export OUTLINE_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-outline-authentik-client-secret' "$BWS_PROJECT_ID")"
+        export OUTLINE_AUTHENTIK_URL="$(bitwarden::get_secret 'app-outline-authentik-url' "$BWS_PROJECT_ID")"
 @module outline-setup.bash
-      ;;
-    *)
-      echo "Unknown module '$module_app' — skipped"
-      continue
-      ;;
-  esac
-
-  echo "$module_app: Done"
+        ;;
+      *)
+        echo "Unknown module '$module_app' — skipped"
+        ;;
+    esac
+    echo "$module_app: Done"
+  else
+    echo "$module_app: skipped"
+  fi
 done
 
 echo
