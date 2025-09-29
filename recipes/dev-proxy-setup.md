@@ -1,8 +1,7 @@
 # dev-proxy-setup.recipe
-This guide describes how to build and run the **Dev Proxy Setup** script from the [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory) repository.
 
-The script is generated from a predefined recipe and can be executed directly after building.
-It is intended for setting up a proxy server that consists of **frp-server**, **dante-server**, and a **Tor singlehop** node.
+This guide describes how to build and run the **Dev Proxy Setup** script from the [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory) repository.
+The script intended for setting up a proxy server that consists of **frp-server**, **dante-server**, and a **Tor singlehop** node.
 
 ---
 
@@ -17,42 +16,17 @@ To build and run **Dev Proxy Setup**:
 
 2. **Download** the latest repository archive:
    ```bash
-   wget https://github.com/ldev1281/debian-setup-factory/archive/refs/heads/main.zip
+   wget https://github.com/ldev1281/debian-setup-factory/releases/latest/download/dev-proxy-setup.bash
    ```
 
-3. **Install `unzip`** (if not already installed):
+3. **Make the script executable**:
    ```bash
-   apt install unzip
+   chmod +x dev-proxy-setup.bash
    ```
 
-4. **Extract** the downloaded archive:
+4. **Run the script**:
    ```bash
-   unzip main.zip
-   ```
-
-5. **Go to the extracted folder**:
-   ```bash
-   cd debian-setup-factory-main
-   ```
-
-6. **Create the `dist` directory**:
-   ```bash
-   mkdir ./dist
-   ```
-
-7. **Build** the `dev-proxy-setup` script from the recipe:
-   ```bash
-   ./builder/build.bash recipes/dev-proxy-setup.recipe >dist/dev-proxy-setup.bash
-   ```
-
-8. **Make the script executable**:
-   ```bash
-   chmod +x dist/dev-proxy-setup.bash
-   ```
-
-9. **Run the script**:
-   ```bash
-   ./dist/dev-proxy-setup.bash
+   .dev-proxy-setup.bash
    ```
 
 ### Required Secrets

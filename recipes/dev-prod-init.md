@@ -1,8 +1,7 @@
 # dev-prod-init.recipe
 
-Build and run the **Dev Prod Init** script from [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory).
-Generates the script from a recipe and runs it.
-It is intended for setting up a server that consists of **Docker**, **Tor**, **Tor Transparent**, **VeraCrypt**, **Backup Tool**, and **Bitwarden CLI**.
+Run the **Dev Prod Init** script from [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory).
+The script intended for setting up a server that consists of **Docker**, **Tor**, **Tor Transparent**, **VeraCrypt**, **Backup Tool**, and **Bitwarden CLI**.
 
 Optionally, the script can also configure the **backup-tool**
 for using **S3 storage** and **GPG encryption** for backups.
@@ -20,47 +19,22 @@ To build and run **Dev Prod Init**:
 
 2. **Download** the latest repository archive:
    ```bash
-   wget https://github.com/ldev1281/debian-setup-factory/archive/refs/heads/main.zip
+   wget https://github.com/ldev1281/debian-setup-factory/releases/latest/download/dev-prod-init.bash
    ```
 
-3. **Install `unzip`** (if not already installed):
+3. **Make the script executable**:
    ```bash
-   apt install unzip
+   chmod +x dev-prod-init.bash
    ```
 
-4. **Extract** the downloaded archive:
+4. **Run the script**:
    ```bash
-   unzip main.zip
-   ```
-
-5. **Go to the extracted folder**:
-   ```bash
-   cd debian-setup-factory-main
-   ```
-
-6. **Create the `dist` directory**:
-   ```bash
-   mkdir ./dist
-   ```
-
-7. **Build** the `dev-prod-init` script from the recipe:
-   ```bash
-   ./builder/build.bash recipes/dev-prod-init.recipe >dist/dev-prod-init.bash
-   ```
-
-8. **Make the script executable**:
-   ```bash
-   chmod +x dist/dev-prod-init.bash
-   ```
-
-9. **Run the script**:
-   ```bash
-   ./dist/dev-prod-init.bash
+   ./dev-prod-init.bash
    ```
 
 ### Required Secrets
 
-Create the following secrets in **Bitwarden Secrets Manager** project **before** running `dev-prod-init.recipe`:
+Create the following secrets in **Bitwarden Secrets Manager** project **before** running `dev-prod-init.bash`:
 
 **GPG (optional)**
 | Secret Name             | Required      | Description |
