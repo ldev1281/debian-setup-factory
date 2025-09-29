@@ -10,14 +10,14 @@ for using **S3 storage** and **GPG encryption** for backups.
 
 ### Quick Start Guide
 
-To build and run **Dev Prod Init**:
+To run **Dev Prod Init**:
 
 1. **Navigate to `/tmp`**:
    ```bash
    cd /tmp
    ```
 
-2. **Download** the latest repository archive:
+2. **Download** the latest version:
    ```bash
    wget https://github.com/ldev1281/debian-setup-factory/releases/latest/download/dev-prod-init.bash
    ```

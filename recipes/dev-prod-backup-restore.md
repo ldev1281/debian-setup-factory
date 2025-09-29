@@ -7,14 +7,14 @@ The script intended for restoring a production server from a backup and must be 
 
 ### Quick Start Guide
 
-To build and run **Dev Prod Backup Restore**:
+To run **Dev Prod Backup Restore**:
 
 1. **Navigate to `/tmp`**:
    ```bash
    cd /tmp
    ```
 
-2. **Download** the latest repository archive:
+2. **Download** the latest version:
    ```bash
    wget https://github.com/ldev1281/debian-setup-factory/releases/latest/download/dev-prod-backup-restore.bash
    ```

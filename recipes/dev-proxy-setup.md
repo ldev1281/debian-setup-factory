@@ -7,14 +7,14 @@ The script intended for setting up a proxy server that consists of **frp-server*
 
 ### Quick Start Guide
 
-To build and run **Dev Proxy Setup**:
+To run **Dev Proxy Setup**:
 
 1. **Navigate to `/tmp`**:
    ```bash
    cd /tmp
    ```
 
-2. **Download** the latest repository archive:
+2. **Download** the latest version:
    ```bash
    wget https://github.com/ldev1281/debian-setup-factory/releases/latest/download/dev-proxy-setup.bash
    ```
