@@ -31,7 +31,7 @@ To build and run **Dev Prod Setup**:
    
 ### Required Secrets
 
-You must run **`dev-proxy-setup.recipe` first**, then run **`dev-prod-setup.recipe`**.
+You must run **`dev-proxy-setup.bash` first**, then run **`dev-prod-setup.bash`**.
 
 - `dev-proxy-setup` **creates** (`upsert`) the following Bitwarden secrets:
   - `proxy-hostname` (Tor onion hostname)

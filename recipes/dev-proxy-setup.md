@@ -31,7 +31,7 @@ To build and run **Dev Proxy Setup**:
 
 ### Required Secrets
 
-Ensure these exist in **Bitwarden Secrets Manager** project **before** running `dev-proxy-setup.recipe`:
+Ensure these exist in **Bitwarden Secrets Manager** project **before** running `dev-proxy-setup.bash`:
 
 | Secret Name          | Required | Description              | Example |
 |----------------------|----------|--------------------------|---------|

@@ -31,7 +31,7 @@ To build and run **Dev Prod Backup Restore**:
 
 ### 🔑 Required Secrets
 
-Before running `ddev-prod-backup-restore.bash`, make sure the following secrets exist in **Bitwarden Secrets Manager** project.
+Before running `dev-prod-backup-restore.bash`, make sure the following secrets exist in **Bitwarden Secrets Manager** project.
 
 | Secret Name             | Required            | Description                                     | Example |
 |-------------------------|---------------------|-------------------------------------------------|---------|
