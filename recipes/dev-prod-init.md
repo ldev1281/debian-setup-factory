@@ -1,36 +1,16 @@
 # dev-prod-init.recipe
 
-Run the **Dev Prod Init** script from [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory).
-The script intended for setting up a server that consists of **Docker**, **Tor**, **Tor Transparent**, **VeraCrypt**, **Backup Tool**, and **Bitwarden CLI**.
+Run the **Dev Prod Init** script from [`debian-setup-factory`](https://github.com/ldev1281/debian-setup-factory).  
+The script is intended for setting up a server that consists of **Docker**, **Tor**, **Tor Transparent**, **VeraCrypt**, **Backup Tool**, and **Bitwarden CLI**.
 
-Optionally, the script can also configure the **backup-tool**
-for using **S3 storage** and **GPG encryption** for backups.
+Optionally, the script can also configure the **backup-tool**  
+to use **S3 storage** and **GPG encryption** for backups.
+
+The setup is performed using the **pre-built installer script** shipped with each project release.  
+You don’t need to manually include `@module ...` files — they are already bundled into a single installer script available in the releases:  
+<https://github.com/ldev1281/debian-setup-factory/releases>
 
 ---
-
-### Quick Start Guide
-
-To run **Dev Prod Init**:
-
-1. **Navigate to `/tmp`**:
-   ```bash
-   cd /tmp
-   ```
-
-2. **Download** the latest version:
-   ```bash
-   wget https://github.com/ldev1281/debian-setup-factory/releases/latest/download/dev-prod-init.bash
-   ```
-
-3. **Make the script executable**:
-   ```bash
-   chmod +x dev-prod-init.bash
-   ```
-
-4. **Run the script**:
-   ```bash
-   ./dev-prod-init.bash
-   ```
 
 ### Required Secrets
 
@@ -60,13 +40,38 @@ Create the following secrets in **Bitwarden Secrets Manager** project **before**
 | `backup-s3-secret`     | yes      | Secret Access Key                           | `wJalrXU...` |
 | `backup-s3-region`     | for AWS  | AWS region when `RCLONE_S3_PROVIDER=AWS`    | `eu-central-1` |
 
+> **BWS Access Reminder:**  
+> If you have any questions about access to Bitwarden Secrets Manager (BWS), how to configure Machine Accounts or tokens — see the [Bitwarden Helpers Module documentation](https://github.com/ldev1281/debian-setup-factory/blob/dev/setup-modules/README.md#bitwarden-helpers-module-bitwardenbash).
 
 > **Note:**  
-> This script should only be executed after running **dev-proxy-setup**,  
-> as it relies on the server environment prepared by that recipe.  
+> This script should only be executed after running **dev-proxy-setup.bash**,  
+> as it relies on the server environment prepared by that script.  
 >
 > During execution, the script can optionally use private GPG key to decrypt the backup  
 > and import your public GPG key for later use (backup encryption).
 
-> **BWS Access Reminder:**  
-> If you have any questions about access to Bitwarden Secrets Manager (BWS), how to configure Machine Accounts or tokens — see the [Bitwarden Helpers Module documentation](https://github.com/ldev1281/debian-setup-factory/blob/dev/setup-modules/README.md#bitwarden-helpers-module-bitwardenbash).
+---
+
+### Quick Start Guide
+
+To run **Dev Prod Init**:
+
+1. **Navigate to `/tmp`**:
+   ```bash
+   cd /tmp
+   ```
+
+2. **Download** the latest version:
+   ```bash
+   wget https://github.com/ldev1281/debian-setup-factory/releases/latest/download/dev-prod-init.bash
+   ```
+
+3. **Make the script executable**:
+   ```bash
+   chmod +x dev-prod-init.bash
+   ```
+
+4. **Run the script**:
+   ```bash
+   ./dev-prod-init.bash
+   ```
