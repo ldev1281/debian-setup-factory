@@ -6,6 +6,7 @@ The script is intended for setting up a production-ready environment that consis
 The setup is performed using the **pre-built installer script** shipped with each project release.  
 You don’t need to manually include `@module ...` files — they are already bundled into a single installer script available in the releases:  
 <https://github.com/ldev1281/debian-setup-factory/releases>
+
 ---
 
 ### Required Secrets
