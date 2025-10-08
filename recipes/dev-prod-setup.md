@@ -30,6 +30,7 @@ Create the following secrets in **Bitwarden Secrets Manager** project **before**
 | `app-outline-authentik-client-id`     | yes      | Authentik OAuth2 client ID for Outline                        | `outline-client-id`              |
 | `app-outline-authentik-client-secret` | yes      | Authentik OAuth2 client secret for Outline                    | `supersecret`                    |
 | `app-outline-authentik-url`           | yes      | Authentik OAuth2 base URL for Outline (with https, no `/`)    | `https://auth.stage.example.com` |
+| `app-firefly-hostname`                | yes      | Firefly app hostname behind proxy                             | `firefly.stage.example.com`      |
 
 > **BWS Access Reminder:**  
 > If you have any questions about access to Bitwarden Secrets Manager (BWS), how to configure Machine Accounts or tokens — see the [Bitwarden Helpers Module documentation](https://github.com/ldev1281/debian-setup-factory/blob/dev/setup-modules/README.md#bitwarden-helpers-module-bitwardenbash).
