@@ -51,7 +51,7 @@ bitwarden::get_secret() {
             local value reply
 
             printf 'Type a value for key "%s" and press Enter (leave empty and press Enter to skip): ' "$key" >&2
-            IFS= read -r -s value
+            IFS= read -r value
             printf '\n' >&2
 
             if [[ -z "$value" ]]; then
