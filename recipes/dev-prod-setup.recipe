@@ -35,6 +35,7 @@ export PROXY_SOCKS5H_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PR
 export PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-hostname'"
 export PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-hostname'"
 export PROXY_CLIENT_CADDY_FIREFLY_APP_HOSTNAME="$(bitwarden::get_secret 'app-firefly-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-firefly-hostname'"
+export PROXY_CLIENT_CADDY_YOUTRACK_APP_HOSTNAME="$(bitwarden::get_secret 'app-youtrack-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-youtrack-hostname'"
 export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-port'"
 export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-token'"
 @module proxy-client-setup.bash
