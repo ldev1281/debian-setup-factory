@@ -34,21 +34,52 @@ bitwarden::get_secret_by_id() {
 }
 
 # Get secret VALUE by KEY (optionally scoped to a project)
+# Get secret VALUE by KEY (optionally scoped to a project)
 bitwarden::get_secret() {
     local key="${1:?usage: bitwarden::get_secret <key> [project_id] [--first]}"
     local project_id="${2-}"
     local mode_first="${3-}"
     local stream ids count
+
     stream="$(bitwarden::list_secrets "$project_id")" || return 1
     ids="$(jq -r --arg k "$key" '.[] | select(.key==$k) | .id' <<<"$stream")" || return 1
     count=$(wc -w <<<"$ids" | awk '{print $1}')
+
     if [[ "$count" -eq 0 ]]; then
         logger::log "No secret found with key \"$key\""
+        if [[ -t 0 || -t 1 ]]; then
+            local value reply
+
+            printf 'Type a value for key "%s" and press Enter (leave empty and press Enter to skip): ' "$key" >&2
+            IFS= read -r -s value
+            printf '\n' >&2
+
+            if [[ -z "$value" ]]; then
+                return 1
+            fi
+
+            printf 'Save this value to Bitwarden? [y/N]: ' >&2
+            IFS= read -r reply
+            if [[ "$reply" =~ ^[Yy]$ || "$reply" =~ ^[Yy][Ee][Ss]$ ]]; then
+                if [[ -n "$project_id" ]]; then
+                    bitwarden::create_secret "$project_id" "$key" "$value" \
+                        || logger::log "Failed to create secret \"$key\" in project \"$project_id\""
+                else
+                    logger::log "Project ID was not provided to bitwarden::get_secret; skipping save."
+                fi
+            fi
+
+            printf '%s\n' "$value"
+            return 0
+        fi
+
         return 1
+
     elif [[ "$count" -gt 1 && "$mode_first" != "--first" ]]; then
         logger::log "Multiple secrets with key \"$key\"; refine (pass project id) or use --first"
         return 1
     fi
+
     bitwarden::get_secret_by_id "$(awk '{print $1; exit}' <<<"$ids")"
 }
 

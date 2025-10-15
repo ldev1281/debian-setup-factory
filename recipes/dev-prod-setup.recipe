@@ -30,13 +30,13 @@ fi
 echo
 echo "Running mandatory proxy-client configuration..."
 echo
-export PROXY_HOST="$(bitwarden::get_secret 'proxy-hostname' "$BWS_PROJECT_ID")"
-export PROXY_SOCKS5H_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")"
-export PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")"
-export PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")"
-export PROXY_CLIENT_CADDY_FIREFLY_APP_HOSTNAME="$(bitwarden::get_secret 'app-firefly-hostname' "$BWS_PROJECT_ID")"
-export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")"
-export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")"
+export PROXY_HOST="$(bitwarden::get_secret 'proxy-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-hostname'"
+export PROXY_SOCKS5H_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-socks5h-port'"
+export PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-hostname'"
+export PROXY_CLIENT_CADDY_OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-hostname'"
+export PROXY_CLIENT_CADDY_FIREFLY_APP_HOSTNAME="$(bitwarden::get_secret 'app-firefly-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-firefly-hostname'"
+export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-port'"
+export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-token'"
 @module proxy-client-setup.bash
 
 MODULES_APPS="${MODULES_APPS:-authentik-setup.bash outline-setup.bash firefly-setup.bash}"
@@ -51,7 +51,7 @@ for module_app in $MODULES_APPS; do
     case "$module_app" in
       authentik-setup.bash)
 @module authentik-setup.bash
-        export AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")"
+        export AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-hostname'"
         # Post-install notice for Authentik
         echo
         echo "============================================================"
@@ -76,10 +76,10 @@ for module_app in $MODULES_APPS; do
         echo
         ;;
       outline-setup.bash)
-        export OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")"
-        export OUTLINE_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-outline-authentik-client-id' "$BWS_PROJECT_ID")"
-        export OUTLINE_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-outline-authentik-client-secret' "$BWS_PROJECT_ID")"
-        export OUTLINE_AUTHENTIK_URL="$(bitwarden::get_secret 'app-outline-authentik-url' "$BWS_PROJECT_ID")"
+        export OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-hostname'"
+        export OUTLINE_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-outline-authentik-client-id' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-client-id'"
+        export OUTLINE_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-outline-authentik-client-secret' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-client-secret'"
+        export OUTLINE_AUTHENTIK_URL="$(bitwarden::get_secret 'app-outline-authentik-url' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-url'"
 @module outline-setup.bash
         echo
         echo "============================================================"
@@ -89,7 +89,7 @@ for module_app in $MODULES_APPS; do
         echo
         ;;
       firefly-setup.bash)
-        export FIREFLY_APP_HOSTNAME="$(bitwarden::get_secret 'app-firefly-hostname' "$BWS_PROJECT_ID")"
+        export FIREFLY_APP_HOSTNAME="$(bitwarden::get_secret 'app-firefly-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-firefly-hostname'"
 @module firefly-setup.bash
         echo
         echo "============================================================"
