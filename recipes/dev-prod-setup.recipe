@@ -51,8 +51,11 @@ for install_app in $INSTALL_APPS; do
   if [[ "${a,,}" =~ ^(y|yes)$ ]]; then
     case "$install_app" in
       authentik)
-@module authentik-setup.bash
         export AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-hostname'"
+        export AUTHENTIK_EMAIL__USERNAME="$(bitwarden::get_secret 'app-authentik-email-username' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-email-username'"
+        export AUTHENTIK_EMAIL__PASSWORD="$(bitwarden::get_secret 'app-authentik-email-password' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-email-password'"
+        export AUTHENTIK_EMAIL__FROM="$(bitwarden::get_secret 'app-authentik-email-from' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-email-from'"
+@module authentik-setup.bash
         # Post-install notice for Authentik
         echo
         echo "============================================================"
