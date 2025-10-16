@@ -18,7 +18,7 @@
 - [outline-setup.bash — Outline Install Module](#outline-setupbash--outline-install-module)  
 - [authentik-setup.bash — Authentik Install Module](#authentik-setupbash--authentik-install-module)  
 - [proxy-client-setup.bash — Proxy Client Install Module](#proxy-client-setupbash--proxy-client-install-module)
-- [firefly-setup.bash — Firefly Install Module](#firefly-setupbash--firefly-install-module)
+- [firefly-setup.bash — Firefly III Install Module](#firefly-setupbash--firefly-install-module)
 - [youtrack-setup.bash — Youtrack Install Module](#youtrack-setupbash--youtrack-install-module)     
 
 ---
