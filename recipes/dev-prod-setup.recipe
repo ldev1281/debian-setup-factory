@@ -40,17 +40,17 @@ export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID
 export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-token'"
 @module proxy-client-setup.bash
 
-MODULES_APPS="${MODULES_APPS:-authentik-setup.bash outline-setup.bash firefly-setup.bash youtrack-setup.bash}"
+INSTALL_APPS="${INSTALL_APPS:-authentik outline firefly youtrack}"
 
-for module_app in $MODULES_APPS; do
+for install_app in $INSTALL_APPS; do
   echo
-  echo "$module_app"
-  read -r -p "Install $module_app? [Y/n]: " a
+  echo "$install_app"
+  read -r -p "Install $install_app? [Y/n]: " a
   a="${a:-y}"
 
   if [[ "${a,,}" =~ ^(y|yes)$ ]]; then
-    case "$module_app" in
-      authentik-setup.bash)
+    case "$install_app" in
+      authentik)
 @module authentik-setup.bash
         export AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-hostname'"
         # Post-install notice for Authentik
@@ -76,7 +76,7 @@ for module_app in $MODULES_APPS; do
         echo "============================================================"
         echo
         ;;
-      outline-setup.bash)
+      outline)
         export OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-hostname'"
         export OUTLINE_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-outline-authentik-client-id' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-client-id'"
         export OUTLINE_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-outline-authentik-client-secret' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-client-secret'"
@@ -89,7 +89,7 @@ for module_app in $MODULES_APPS; do
         echo "============================================================"
         echo
         ;;
-      firefly-setup.bash)
+      firefly)
         export FIREFLY_APP_HOSTNAME="$(bitwarden::get_secret 'app-firefly-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-firefly-hostname'"
 @module firefly-setup.bash
         echo
@@ -99,7 +99,7 @@ for module_app in $MODULES_APPS; do
         echo "============================================================"
         echo
         ;;
-      youtrack-setup.bash)
+      youtrack)
         export YOUTRACK_APP_HOSTNAME="$(bitwarden::get_secret 'app-youtrack-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-youtrack-hostname'"
 @module youtrack-setup.bash
         echo
@@ -110,12 +110,12 @@ for module_app in $MODULES_APPS; do
         echo
         ;;
       *)
-        echo "Unknown module '$module_app' — skipped"
+        echo "Unknown app '$install_app' — skipped"
         ;;
     esac
-    echo "$module_app: Done"
+    echo "$install_app: Done"
   else
-    echo "$module_app: skipped"
+    echo "$install_app: Skipped"
   fi
 done
 
