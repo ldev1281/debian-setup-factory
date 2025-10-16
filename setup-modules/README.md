@@ -17,7 +17,9 @@
 - [bitwarden.bash — Bitwarden Helpers Module](#bitwardenbash--bitwarden-helpers-module)  
 - [outline-setup.bash — Outline Install Module](#outline-setupbash--outline-install-module)  
 - [authentik-setup.bash — Authentik Install Module](#authentik-setupbash--authentik-install-module)  
-- [proxy-client-setup.bash — Proxy Client Install Module](#proxy-client-setupbash--proxy-client-install-module)  
+- [proxy-client-setup.bash — Proxy Client Install Module](#proxy-client-setupbash--proxy-client-install-module)
+- [firefly-setup.bash — Firefly Install Module](#firefly-setupbash--firefly-install-module)
+- [youtrack-setup.bash — Youtrack Install Module](#youtrack-setupbash--youtrack-install-module)     
 
 ---
 
@@ -458,4 +460,48 @@ It prepares environment, clones repo, and executes `init.bash`.
 
 ```bash
 @module proxy-client-setup.bash
+```
+
+---
+
+## youtrack-setup.bash — YouTrack Install Module
+
+### Description
+The `youtrack-setup` module automates deployment of **YouTrack** via Docker Compose.  
+It prepares environment, clones repo, and executes `init.bash`.
+
+### Configuration Variables
+
+| Variable                           | Description                            | Default                                                           |
+|------------------------------------|----------------------------------------|-------------------------------------------------------------------|
+| `YOUTRACK_SETUP_REPO_URL`          | Git repository URL for YouTrack        | `https://github.com/ldev1281/docker-compose-youtrack.git`         |
+| `YOUTRACK_SETUP_TARGET_PARENT_DIR` | Parent directory for YouTrack          | `/docker`                                                         |
+| `YOUTRACK_SETUP_TARGET_DIR`        | Target directory for YouTrack instance | `${YOUTRACK_SETUP_TARGET_PARENT_DIR}/youtrack`                    |
+
+### Usage Example
+
+```bash
+@module youtrack-setup.bash
+```
+
+---
+
+## firefly-setup.bash — Firefly III Install Module
+
+### Description
+The `firefly-setup` module automates deployment of **Firefly III** via Docker Compose.  
+It prepares environment, clones repo, and executes `init.bash`.
+
+### Configuration Variables
+
+| Variable                           | Description                            | Default                                                           |
+|------------------------------------|----------------------------------------|-------------------------------------------------------------------|
+| `FIREFLY_SETUP_REPO_URL`           | Git repository URL for Firefly III     | `https://github.com/ldev1281/docker-compose-firefly.git`          |
+| `FIREFLY_SETUP_TARGET_PARENT_DIR`  | Parent directory for Firefly III       | `/docker`                                                         |
+| `FIREFLY_SETUP_TARGET_DIR`         | Target directory for Firefly instance  | `${FIREFLY_SETUP_TARGET_PARENT_DIR}/firefly`                      |
+
+### Usage Example
+
+```bash
+@module firefly-setup.bash
 ```
