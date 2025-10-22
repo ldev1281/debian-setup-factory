@@ -88,6 +88,35 @@ This will create a standalone Bash script combining all modules and inline steps
 
 ---
 
+## 🐞 Known Issues
+
+### Issue: Tor DNS Occasionally Fails to Resolve Hosts
+
+**Description:**  
+In production environments, the Tor DNS resolver may occasionally fail to resolve certain hostnames.  
+This issue is typically caused by unstable Tor circuits or internal DNS cache inconsistencies.
+
+Example error:
+```
+Could not resolve host: github.com
+```
+
+**Solution:**  
+To fix the problem, restart the Tor service to refresh all active instances:
+
+```bash
+sudo systemctl restart tor
+```
+
+If that doesn’t resolve the issue, manually restart both individual instances:
+
+```bash
+sudo systemctl restart tor@default.service
+sudo systemctl restart tor@transparent.service
+```
+
+> **💡 Note:** Using `systemctl restart tor` is usually enough — it automatically restarts all active Tor instances.
+
 ## License
 
 Licensed under the Prostokvashino License. See [LICENSE](LICENSE) for details.
