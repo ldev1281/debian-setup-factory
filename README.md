@@ -88,7 +88,7 @@ This will create a standalone Bash script combining all modules and inline steps
 
 ---
 
-## 🐞 Known Issues
+##  Known Issues
 
 ### Issue: Tor DNS Occasionally Fails to Resolve Hosts
 
@@ -115,7 +115,7 @@ sudo systemctl restart tor@default.service
 sudo systemctl restart tor@transparent.service
 ```
 
-> **💡 Note:** Using `systemctl restart tor` is usually enough — it automatically restarts all active Tor instances.
+> ** Note:** Using `systemctl restart tor` is usually enough — it automatically restarts all active Tor instances.
 
 ## License
 
