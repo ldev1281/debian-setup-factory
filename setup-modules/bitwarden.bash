@@ -46,7 +46,7 @@ bitwarden::get_secret() {
     count=$(wc -w <<<"$ids" | awk '{print $1}')
 
     if [[ "$count" -eq 0 ]]; then
-        printf "No secret found with key \"$key\"" >&2
+        printf "No secret found with key \"$key\"\n" >&2
         if [[ -t 0 || -t 1 ]]; then
             local value reply
 
@@ -63,9 +63,9 @@ bitwarden::get_secret() {
             if [[ "$reply" =~ ^[Yy]$ || "$reply" =~ ^[Yy][Ee][Ss]$ ]]; then
                 if [[ -n "$project_id" ]]; then
                     bitwarden::create_secret "$project_id" "$key" "$value" \
-                        || printf "Failed to create secret \"$key\" in project \"$project_id\"" >&2
+                        || printf "Failed to create secret \"$key\" in project \"$project_id\"\n" >&2
                 else
-                    printf "Project ID was not provided to bitwarden::get_secret; skipping save." >&2
+                    printf "Project ID was not provided to bitwarden::get_secret; skipping save.\n" >&2
                 fi
             fi
 
@@ -76,7 +76,7 @@ bitwarden::get_secret() {
         return 1
 
     elif [[ "$count" -gt 1 && "$mode_first" != "--first" ]]; then
-        printf "Multiple secrets with key \"$key\"; refine (pass project id) or use --first" >&2
+        printf "Multiple secrets with key \"$key\"; refine (pass project id) or use --first\n" >&2
         return 1
     fi
 
