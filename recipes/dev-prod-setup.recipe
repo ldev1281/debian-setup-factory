@@ -79,19 +79,6 @@ for install_app in $INSTALL_APPS; do
         echo "============================================================"
         echo
         ;;
-      outline)
-        export OUTLINE_APP_HOSTNAME="$(bitwarden::get_secret 'app-outline-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-hostname'"
-        export OUTLINE_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-outline-authentik-client-id' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-client-id'"
-        export OUTLINE_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-outline-authentik-client-secret' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-client-secret'"
-        export OUTLINE_AUTHENTIK_URL="$(bitwarden::get_secret 'app-outline-authentik-url' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-outline-authentik-url'"
-@module outline-setup.bash
-        echo
-        echo "============================================================"
-        echo "Once the setup is completed, the Outline will be available at:"
-        echo "  https://${OUTLINE_APP_HOSTNAME}"
-        echo "============================================================"
-        echo
-        ;;
       firefly)
         export FIREFLY_APP_HOSTNAME="$(bitwarden::get_secret 'app-firefly-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-firefly-hostname'"
 @module firefly-setup.bash
