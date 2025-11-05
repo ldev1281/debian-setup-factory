@@ -505,3 +505,24 @@ It prepares environment, clones repo, and executes `init.bash`.
 ```bash
 @module firefly-setup.bash
 ```
+
+---
+
+## gitlab-setup.bash — GitLab Install Module
+
+### Description
+The `gitlab-setup` module automates deployment of **GitLab** via Docker Compose.  
+It prepares the environment, clones the repository, and executes `init.bash`.
+
+### Configuration Variables
+
+| Variable                           | Description                            | Default                                                           |
+|------------------------------------|----------------------------------------|-------------------------------------------------------------------|
+| `GITLAB_SETUP_REPO_URL`            | Git repository URL for GitLab          | `https://github.com/ldev1281/docker-compose-gitlab.git`           |
+| `GITLAB_SETUP_TARGET_PARENT_DIR`   | Parent directory for GitLab            | `/docker`                                                         |
+| `GITLAB_SETUP_TARGET_DIR`          | Target directory for GitLab instance   | `${GITLAB_SETUP_TARGET_PARENT_DIR}/gitlab`                        |
+
+### Usage Example
+
+```bash
+@module gitlab-setup.bash
