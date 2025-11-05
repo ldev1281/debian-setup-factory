@@ -35,11 +35,13 @@ export PROXY_SOCKS5H_PORT="$(bitwarden::get_secret 'proxy-socks5h-port' "$BWS_PR
 export PROXY_CLIENT_CADDY_AUTHENTIK_APP_HOSTNAME="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-hostname'"
 export PROXY_CLIENT_CADDY_FIREFLY_APP_HOSTNAME="$(bitwarden::get_secret 'app-firefly-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-firefly-hostname'"
 export PROXY_CLIENT_CADDY_YOUTRACK_APP_HOSTNAME="$(bitwarden::get_secret 'app-youtrack-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-youtrack-hostname'"
+export PROXY_CLIENT_CADDY_GITLAB_APP_HOSTNAME="$(bitwarden::get_secret 'app-gitlab-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-gitlab-hostname'"
+export PROXY_CLIENT_CADDY_REGISTRY_APP_HOSTNAME="$(bitwarden::get_secret 'app-registry-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-registry-hostname'"
 export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-port'"
 export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-token'"
 @module proxy-client-setup.bash
 
-INSTALL_APPS="${INSTALL_APPS:-authentik firefly youtrack}"
+INSTALL_APPS="${INSTALL_APPS:-authentik firefly youtrack gitlab}"
 
 for install_app in $INSTALL_APPS; do
   echo
@@ -95,6 +97,25 @@ for install_app in $INSTALL_APPS; do
         echo "============================================================"
         echo "Once the setup is completed, YouTrack will be available at:"
         echo "  https://${YOUTRACK_APP_HOSTNAME}"
+        echo "============================================================"
+        echo
+        ;;
+      gitlab)
+        export GITLAB_APP_HOSTNAME="$(bitwarden::get_secret 'app-gitlab-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-gitlab-hostname'"
+        export GITLAB_REGISTRY_URL="$(bitwarden::get_secret 'app-registry-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-registry-hostname'"
+        export GITLAB_AUTHENTIK_CLIENT_ID="$(bitwarden::get_secret 'app-gitlab-authentik-client-id' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-gitlab-authentik-client-id'"
+        export GITLAB_AUTHENTIK_CLIENT_SECRET="$(bitwarden::get_secret 'app-gitlab-authentik-client-secret' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-gitlab-authentik-client-secret'"
+        export GITLAB_AUTHENTIK_URL="$(bitwarden::get_secret 'app-authentik-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-authentik-hostname'"
+        export GITLAB_SMTP_USERNAME="$(bitwarden::get_secret 'app-gitlab-smtp-username' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-gitlab-smtp-username'"
+        export GITLAB_SMTP_PASSWORD="$(bitwarden::get_secret 'app-gitlab-smtp-password' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-gitlab-smtp-password'"        
+@module gitlab-setup.bash
+        echo
+        echo "============================================================"
+        echo "Once the setup is completed, Gitlab will be available at:"
+        echo "https://${GITLAB_APP_HOSTNAME}"
+        echo
+        echo "Docker registry will be available at:"
+        echo "https://${GITLAB_REGISTRY_URL}"
         echo "============================================================"
         echo
         ;;
