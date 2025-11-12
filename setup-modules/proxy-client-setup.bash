@@ -11,7 +11,7 @@ logger::log "Setting up proxy client via docker-compose"
 PROXY_CLIENT_SETUP_REPO_URL="${PROXY_CLIENT_SETUP_REPO_URL:-https://github.com/ldev1281/docker-compose-proxy-client.git}"
 PROXY_CLIENT_SETUP_TARGET_PARENT_DIR="${PROXY_CLIENT_SETUP_TARGET_PARENT_DIR:-/docker}"
 PROXY_CLIENT_SETUP_TARGET_DIR="${PROXY_CLIENT_SETUP_TARGET_DIR:-${PROXY_CLIENT_SETUP_TARGET_PARENT_DIR}/proxy-client}"
-PROXY_CLIENT_SETUP_GIT_BRANCH="${PROXY_CLIENT_SETUP_GIT_BRANCH:-}"
+PROXY_CLIENT_SETUP_GIT_BRANCH="${PROXY_CLIENT_SETUP_GIT_BRANCH:-main}"
 PROXY_CLIENT_SETUP_INIT_PATH="${PROXY_CLIENT_SETUP_INIT_PATH:-./tools/init.bash}"
 
 # Require root
@@ -29,21 +29,31 @@ cd "${PROXY_CLIENT_SETUP_TARGET_DIR}" || logger::err "Failed to enter target dir
 
 # Clone or update repository
 if [ -d ".git" ]; then
-    logger::log "Git repository already present, pulling latest changes"
-    git fetch --all || logger::err "git fetch failed"
-    if [ -n "${PROXY_CLIENT_SETUP_GIT_BRANCH}" ]; then
-        git checkout "${PROXY_CLIENT_SETUP_GIT_BRANCH}" || logger::err "Failed to checkout branch ${PROXY_CLIENT_SETUP_GIT_BRANCH}"
-        git pull --ff-only origin "${PROXY_CLIENT_SETUP_GIT_BRANCH}" || logger::err "git pull failed"
-    else
-        git pull --ff-only || logger::err "git pull failed"
-    fi
+    logger::log "Git repository already present, updating branch ${PROXY_CLIENT_SETUP_GIT_BRANCH}"
+
+    git config remote.origin.tagOpt --no-tags || true
+    git config --unset-all remote.origin.fetch 2>/dev/null || true
+    git config --add remote.origin.fetch "+refs/heads/${PROXY_CLIENT_SETUP_GIT_BRANCH}:refs/remotes/origin/${PROXY_CLIENT_SETUP_GIT_BRANCH}" || logger::err "Failed to set refspec for ${PROXY_CLIENT_SETUP_GIT_BRANCH}"
+
+    git fetch --prune origin || logger::err "git fetch failed"
+    git fetch origin "${PROXY_CLIENT_SETUP_GIT_BRANCH}:refs/remotes/origin/${PROXY_CLIENT_SETUP_GIT_BRANCH}" || logger::err "Remote branch '${PROXY_CLIENT_SETUP_GIT_BRANCH}' not found on origin"
+
+    git switch -C "${PROXY_CLIENT_SETUP_GIT_BRANCH}" "origin/${PROXY_CLIENT_SETUP_GIT_BRANCH}" || logger::err "Failed to switch to ${PROXY_CLIENT_SETUP_GIT_BRANCH}"
+    git branch --set-upstream-to="origin/${PROXY_CLIENT_SETUP_GIT_BRANCH}" "${PROXY_CLIENT_SETUP_GIT_BRANCH}" || logger::err "Failed to set upstream to origin/${PROXY_CLIENT_SETUP_GIT_BRANCH}"
+
+    git pull --ff-only || logger::err "git pull failed"
+
 else
     logger::log "Cloning ${PROXY_CLIENT_SETUP_REPO_URL} into ${PROXY_CLIENT_SETUP_TARGET_DIR}"
-    if [ -n "${PROXY_CLIENT_SETUP_GIT_BRANCH}" ]; then
-        git clone --depth 1 --branch "${PROXY_CLIENT_SETUP_GIT_BRANCH}" "${PROXY_CLIENT_SETUP_REPO_URL}" . || logger::err "git clone failed"
-    else
-        git clone --depth 1 "${PROXY_CLIENT_SETUP_REPO_URL}" . || logger::err "git clone failed"
-    fi
+
+    git clone --single-branch --branch "${PROXY_CLIENT_SETUP_GIT_BRANCH}" "${PROXY_CLIENT_SETUP_REPO_URL}" . || logger::err "git clone failed"
+
+    git config remote.origin.tagOpt --no-tags || true
+    git config --unset-all remote.origin.fetch 2>/dev/null || true
+    git config --add remote.origin.fetch "+refs/heads/${PROXY_CLIENT_SETUP_GIT_BRANCH}:refs/remotes/origin/${PROXY_CLIENT_SETUP_GIT_BRANCH}" || logger::err "Failed to set refspec for ${PROXY_CLIENT_SETUP_GIT_BRANCH}"
+
+    git fetch --prune origin || logger::err "git fetch failed"
+    git branch --set-upstream-to="origin/${PROXY_CLIENT_SETUP_GIT_BRANCH}" "${PROXY_CLIENT_SETUP_GIT_BRANCH}" || logger::err "Failed to set upstream to origin/${PROXY_CLIENT_SETUP_GIT_BRANCH}"
 fi
 
 # Post-clone/init
