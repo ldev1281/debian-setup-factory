@@ -17,17 +17,17 @@ AUTHENTIK_SETUP_GITHUB_REPO="${AUTHENTIK_SETUP_GITHUB_REPO:-ldev1281/docker-comp
 AUTHENTIK_SETUP_TARGET_PARENT_DIR="${AUTHENTIK_SETUP_TARGET_PARENT_DIR:-/docker}"
 AUTHENTIK_SETUP_TARGET_DIR="${AUTHENTIK_SETUP_TARGET_DIR:-${AUTHENTIK_SETUP_TARGET_PARENT_DIR}/${AUTHENTIK_SETUP_APP_NAME}}"
 
+# Init script path (absolute, но по умолчанию tools/init.bash внутри TARGET)
+AUTHENTIK_SETUP_INIT_PATH="${AUTHENTIK_SETUP_INIT_PATH:-${AUTHENTIK_SETUP_TARGET_DIR}/tools/init.bash}"
+
 # Release version (empty → latest)
 AUTHENTIK_SETUP_VERSION="${AUTHENTIK_SETUP_VERSION:-}"
 
-# Init script path
-AUTHENTIK_SETUP_INIT_PATH="${AUTHENTIK_SETUP_INIT_PATH:-./tools/init.bash}"
-
-# Tmp directory for archive extraction
+# Tmp directory for archive extraction (content goes directly here)
 AUTHENTIK_SETUP_TMP_DIR="${AUTHENTIK_SETUP_TMP_DIR:-$(mktemp -d)}"
 
-# Archive filename inside tmp
-AUTHENTIK_SETUP_ARCHIVE_FILE="${AUTHENTIK_SETUP_ARCHIVE_FILE:-${AUTHENTIK_SETUP_TMP_DIR}/${AUTHENTIK_SETUP_APP_NAME}-release.tar.gz}"
+# Release asset name (GitHub release file)
+AUTHENTIK_SETUP_ARCHIVE_NAME="${AUTHENTIK_SETUP_ARCHIVE_NAME:-docker-compose-${AUTHENTIK_SETUP_APP_NAME}.tar.gz}"
 
 # Backup root directory
 AUTHENTIK_SETUP_BACKUP_ROOT="${AUTHENTIK_SETUP_BACKUP_ROOT:-/var/lib/limbo-backup/artefacts/restore-archives}"
@@ -35,11 +35,13 @@ AUTHENTIK_SETUP_BACKUP_ROOT="${AUTHENTIK_SETUP_BACKUP_ROOT:-/var/lib/limbo-backu
 # Backup directory (per-run)
 AUTHENTIK_SETUP_BACKUP_DIR="${AUTHENTIK_SETUP_BACKUP_DIR:-${AUTHENTIK_SETUP_BACKUP_ROOT}/${AUTHENTIK_SETUP_APP_NAME}_$(date +%Y%m%d_%H%M%S)}"
 
+
 ###############################################################################
 # START
 ###############################################################################
 
 logger::log "Setting up ${AUTHENTIK_SETUP_APP_NAME} via docker-compose (release mode)"
+logger::log "Target directory: ${AUTHENTIK_SETUP_TARGET_DIR}"
 
 # Require root
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
@@ -48,9 +50,9 @@ logger::log "Setting up ${AUTHENTIK_SETUP_APP_NAME} via docker-compose (release 
 ###############################################################################
 # DEPENDENCIES
 ###############################################################################
-logger::log "Installing dependencies (ca-certificates, curl, tar, gzip, rsync, jq)"
+logger::log "Installing dependencies (ca-certificates, curl, tar, gzip, rsync)"
 apt update || logger::err "apt update failed"
-apt install -y ca-certificates curl tar gzip rsync jq || logger::err "Failed to install required packages"
+apt install -y ca-certificates curl tar gzip rsync || logger::err "Failed to install required packages"
 
 
 ###############################################################################
@@ -62,41 +64,29 @@ cd "${AUTHENTIK_SETUP_TARGET_DIR}" || logger::err "Cannot enter target dir"
 
 
 ###############################################################################
-# DETERMINE RELEASE VERSION
+# DETERMINE RELEASE ASSET URL
 ###############################################################################
 if [ -z "${AUTHENTIK_SETUP_VERSION}" ]; then
-  AUTHENTIK_SETUP_API_URL="https://api.github.com/repos/${AUTHENTIK_SETUP_GITHUB_REPO}/releases/latest"
-  logger::log "Determining latest release tag from ${AUTHENTIK_SETUP_API_URL}"
-
-  AUTHENTIK_SETUP_VERSION="$(
-    curl -fsSL "${AUTHENTIK_SETUP_API_URL}" | jq -r '.tag_name' 2>/dev/null || echo ""
-  )"
-
-  [ -n "${AUTHENTIK_SETUP_VERSION}" ] || logger::err "Failed to detect latest tag"
-  logger::log "Latest release tag: ${AUTHENTIK_SETUP_VERSION}"
+  # latest release
+  AUTHENTIK_SETUP_ARCHIVE_URL="https://github.com/${AUTHENTIK_SETUP_GITHUB_REPO}/releases/latest/download/${AUTHENTIK_SETUP_ARCHIVE_NAME}"
+  logger::log "Using latest release asset: ${AUTHENTIK_SETUP_ARCHIVE_URL}"
 else
+  # specific tag
   logger::log "Using user-provided release tag: ${AUTHENTIK_SETUP_VERSION}"
+  AUTHENTIK_SETUP_ARCHIVE_URL="https://github.com/${AUTHENTIK_SETUP_GITHUB_REPO}/releases/download/${AUTHENTIK_SETUP_VERSION}/${AUTHENTIK_SETUP_ARCHIVE_NAME}"
+  logger::log "Release asset URL: ${AUTHENTIK_SETUP_ARCHIVE_URL}"
 fi
 
-AUTHENTIK_SETUP_ARCHIVE_URL="https://github.com/${AUTHENTIK_SETUP_GITHUB_REPO}/archive/refs/tags/${AUTHENTIK_SETUP_VERSION}.tar.gz"
-logger::log "Archive URL: ${AUTHENTIK_SETUP_ARCHIVE_URL}"
-
 
 ###############################################################################
-# DOWNLOAD & EXTRACT RELEASE
+# DOWNLOAD & EXTRACT RELEASE (DIRECTLY INTO TMP)
 ###############################################################################
-logger::log "Downloading: ${AUTHENTIK_SETUP_ARCHIVE_URL}"
-curl -fsSL "${AUTHENTIK_SETUP_ARCHIVE_URL}" -o "${AUTHENTIK_SETUP_ARCHIVE_FILE}" \
-  || logger::err "Failed to download archive"
+logger::log "Downloading and extracting to tmp dir: ${AUTHENTIK_SETUP_TMP_DIR}"
+mkdir -p "${AUTHENTIK_SETUP_TMP_DIR}" || logger::err "Cannot create tmp dir"
 
-logger::log "Extracting archive into: ${AUTHENTIK_SETUP_TMP_DIR}"
-tar -xzf "${AUTHENTIK_SETUP_ARCHIVE_FILE}" -C "${AUTHENTIK_SETUP_TMP_DIR}" \
-  || logger::err "Failed to extract archive"
-
-AUTHENTIK_SETUP_EXTRACTED_SUBDIR="$(find "${AUTHENTIK_SETUP_TMP_DIR}" -mindepth 1 -maxdepth 1 -type d -print -quit)"
-[ -n "${AUTHENTIK_SETUP_EXTRACTED_SUBDIR}" ] || logger::err "Extracted directory not found"
-
-logger::log "Extracted directory: ${AUTHENTIK_SETUP_EXTRACTED_SUBDIR}"
+curl -fsSL "${AUTHENTIK_SETUP_ARCHIVE_URL}" \
+  | tar -xz -C "${AUTHENTIK_SETUP_TMP_DIR}" \
+  || logger::err "Failed to download/extract archive"
 
 
 ###############################################################################
@@ -120,7 +110,7 @@ rsync -a \
   --suffix=".bak" \
   --exclude '.env' \
   --exclude 'vol' \
-  "${AUTHENTIK_SETUP_EXTRACTED_SUBDIR}/" "./" \
+  "${AUTHENTIK_SETUP_TMP_DIR}/" "./" \
   || logger::err "Failed to sync release files"
 
 
