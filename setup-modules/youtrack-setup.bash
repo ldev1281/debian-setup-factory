@@ -17,17 +17,17 @@ YOUTRACK_SETUP_GITHUB_REPO="${YOUTRACK_SETUP_GITHUB_REPO:-ldev1281/docker-compos
 YOUTRACK_SETUP_TARGET_PARENT_DIR="${YOUTRACK_SETUP_TARGET_PARENT_DIR:-/docker}"
 YOUTRACK_SETUP_TARGET_DIR="${YOUTRACK_SETUP_TARGET_DIR:-${YOUTRACK_SETUP_TARGET_PARENT_DIR}/${YOUTRACK_SETUP_APP_NAME}}"
 
+# Init script path (absolute, по умолчанию tools/init.bash в целевой директории)
+YOUTRACK_SETUP_INIT_PATH="${YOUTRACK_SETUP_INIT_PATH:-${YOUTRACK_SETUP_TARGET_DIR}/tools/init.bash}"
+
 # Release version (empty → latest)
 YOUTRACK_SETUP_VERSION="${YOUTRACK_SETUP_VERSION:-}"
 
-# Init script path
-YOUTRACK_SETUP_INIT_PATH="${YOUTRACK_SETUP_INIT_PATH:-./tools/init.bash}"
-
-# Tmp directory for archive extraction
+# Tmp directory for archive extraction (content goes directly here)
 YOUTRACK_SETUP_TMP_DIR="${YOUTRACK_SETUP_TMP_DIR:-$(mktemp -d)}"
 
-# Archive filename inside tmp
-YOUTRACK_SETUP_ARCHIVE_FILE="${YOUTRACK_SETUP_ARCHIVE_FILE:-${YOUTRACK_SETUP_TMP_DIR}/${YOUTRACK_SETUP_APP_NAME}-release.tar.gz}"
+# Release asset name (GitHub release file)
+YOUTRACK_SETUP_ARCHIVE_NAME="${YOUTRACK_SETUP_ARCHIVE_NAME:-docker-compose-${YOUTRACK_SETUP_APP_NAME}.tar.gz}"
 
 # Backup root directory
 YOUTRACK_SETUP_BACKUP_ROOT="${YOUTRACK_SETUP_BACKUP_ROOT:-/var/lib/limbo-backup/artefacts/restore-archives}"
@@ -35,11 +35,13 @@ YOUTRACK_SETUP_BACKUP_ROOT="${YOUTRACK_SETUP_BACKUP_ROOT:-/var/lib/limbo-backup/
 # Backup directory (per-run)
 YOUTRACK_SETUP_BACKUP_DIR="${YOUTRACK_SETUP_BACKUP_DIR:-${YOUTRACK_SETUP_BACKUP_ROOT}/${YOUTRACK_SETUP_APP_NAME}_$(date +%Y%m%d_%H%M%S)}"
 
+
 ###############################################################################
 # START
 ###############################################################################
 
 logger::log "Setting up ${YOUTRACK_SETUP_APP_NAME} via docker-compose (release mode)"
+logger::log "Target directory: ${YOUTRACK_SETUP_TARGET_DIR}"
 
 # Require root
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
@@ -48,9 +50,9 @@ logger::log "Setting up ${YOUTRACK_SETUP_APP_NAME} via docker-compose (release m
 ###############################################################################
 # DEPENDENCIES
 ###############################################################################
-logger::log "Installing dependencies (ca-certificates, curl, tar, gzip, rsync, jq)"
+logger::log "Installing dependencies (ca-certificates, curl, tar, gzip, rsync)"
 apt update || logger::err "apt update failed"
-apt install -y ca-certificates curl tar gzip rsync jq || logger::err "Failed to install required packages"
+apt install -y ca-certificates curl tar gzip rsync || logger::err "Failed to install required packages"
 
 
 ###############################################################################
@@ -62,41 +64,29 @@ cd "${YOUTRACK_SETUP_TARGET_DIR}" || logger::err "Cannot enter target dir"
 
 
 ###############################################################################
-# DETERMINE RELEASE VERSION
+# DETERMINE RELEASE ASSET URL
 ###############################################################################
 if [ -z "${YOUTRACK_SETUP_VERSION}" ]; then
-  YOUTRACK_SETUP_API_URL="https://api.github.com/repos/${YOUTRACK_SETUP_GITHUB_REPO}/releases/latest"
-  logger::log "Determining latest release tag from ${YOUTRACK_SETUP_API_URL}"
-
-  YOUTRACK_SETUP_VERSION="$(
-    curl -fsSL "${YOUTRACK_SETUP_API_URL}" | jq -r '.tag_name' 2>/dev/null || echo ""
-  )"
-
-  [ -n "${YOUTRACK_SETUP_VERSION}" ] || logger::err "Failed to detect latest tag"
-  logger::log "Latest release tag: ${YOUTRACK_SETUP_VERSION}"
+  # latest release
+  YOUTRACK_SETUP_ARCHIVE_URL="https://github.com/${YOUTRACK_SETUP_GITHUB_REPO}/releases/latest/download/${YOUTRACK_SETUP_ARCHIVE_NAME}"
+  logger::log "Using latest release asset: ${YOUTRACK_SETUP_ARCHIVE_URL}"
 else
+  # specific tag
   logger::log "Using user-provided release tag: ${YOUTRACK_SETUP_VERSION}"
+  YOUTRACK_SETUP_ARCHIVE_URL="https://github.com/${YOUTRACK_SETUP_GITHUB_REPO}/releases/download/${YOUTRACK_SETUP_VERSION}/${YOUTRACK_SETUP_ARCHIVE_NAME}"
+  logger::log "Release asset URL: ${YOUTRACK_SETUP_ARCHIVE_URL}"
 fi
 
-YOUTRACK_SETUP_ARCHIVE_URL="https://github.com/${YOUTRACK_SETUP_GITHUB_REPO}/archive/refs/tags/${YOUTRACK_SETUP_VERSION}.tar.gz"
-logger::log "Archive URL: ${YOUTRACK_SETUP_ARCHIVE_URL}"
-
 
 ###############################################################################
-# DOWNLOAD & EXTRACT RELEASE
+# DOWNLOAD & EXTRACT RELEASE (DIRECTLY INTO TMP)
 ###############################################################################
-logger::log "Downloading: ${YOUTRACK_SETUP_ARCHIVE_URL}"
-curl -fsSL "${YOUTRACK_SETUP_ARCHIVE_URL}" -o "${YOUTRACK_SETUP_ARCHIVE_FILE}" \
-  || logger::err "Failed to download archive"
+logger::log "Downloading and extracting to tmp dir: ${YOUTRACK_SETUP_TMP_DIR}"
+mkdir -p "${YOUTRACK_SETUP_TMP_DIR}" || logger::err "Cannot create tmp dir"
 
-logger::log "Extracting archive into: ${YOUTRACK_SETUP_TMP_DIR}"
-tar -xzf "${YOUTRACK_SETUP_ARCHIVE_FILE}" -C "${YOUTRACK_SETUP_TMP_DIR}" \
-  || logger::err "Failed to extract archive"
-
-YOUTRACK_SETUP_EXTRACTED_SUBDIR="$(find "${YOUTRACK_SETUP_TMP_DIR}" -mindepth 1 -maxdepth 1 -type d -print -quit)"
-[ -n "${YOUTRACK_SETUP_EXTRACTED_SUBDIR}" ] || logger::err "Extracted directory not found"
-
-logger::log "Extracted directory: ${YOUTRACK_SETUP_EXTRACTED_SUBDIR}"
+curl -fsSL "${YOUTRACK_SETUP_ARCHIVE_URL}" \
+  | tar -xz -C "${YOUTRACK_SETUP_TMP_DIR}" \
+  || logger::err "Failed to download/extract archive"
 
 
 ###############################################################################
@@ -120,7 +110,7 @@ rsync -a \
   --suffix=".bak" \
   --exclude '.env' \
   --exclude 'vol' \
-  "${YOUTRACK_SETUP_EXTRACTED_SUBDIR}/" "./" \
+  "${YOUTRACK_SETUP_TMP_DIR}/" "./" \
   || logger::err "Failed to sync release files"
 
 
