@@ -1,60 +1,128 @@
-# proxy client setup module
+# proxy-client setup module
 set -Euo pipefail
 
 @module logger.bash
 
-logger::log "Setting up proxy client via docker-compose"
+###############################################################################
+# CONFIGURATION (ALL VARIABLES MUST BE HERE)
+###############################################################################
 
-#
-# Defaults (override via environment variables)
-#
-PROXY_CLIENT_SETUP_REPO_URL="${PROXY_CLIENT_SETUP_REPO_URL:-https://github.com/ldev1281/docker-compose-proxy-client.git}"
+# Application Identity
+PROXY_CLIENT_SETUP_APP_NAME="${PROXY_CLIENT_SETUP_APP_NAME:-proxy-client}"
+
+# GitHub Repository (owner/repo)
+PROXY_CLIENT_SETUP_GITHUB_REPO="${PROXY_CLIENT_SETUP_GITHUB_REPO:-ldev1281/docker-compose-proxy-client}"
+
+# Install target directories
 PROXY_CLIENT_SETUP_TARGET_PARENT_DIR="${PROXY_CLIENT_SETUP_TARGET_PARENT_DIR:-/docker}"
-PROXY_CLIENT_SETUP_TARGET_DIR="${PROXY_CLIENT_SETUP_TARGET_DIR:-${PROXY_CLIENT_SETUP_TARGET_PARENT_DIR}/proxy-client}"
-PROXY_CLIENT_SETUP_GIT_BRANCH="${PROXY_CLIENT_SETUP_GIT_BRANCH:-}"
-PROXY_CLIENT_SETUP_INIT_PATH="${PROXY_CLIENT_SETUP_INIT_PATH:-./tools/init.bash}"
+PROXY_CLIENT_SETUP_TARGET_DIR="${PROXY_CLIENT_SETUP_TARGET_DIR:-${PROXY_CLIENT_SETUP_TARGET_PARENT_DIR}/${PROXY_CLIENT_SETUP_APP_NAME}}"
+
+# Init script path (absolute, по умолчанию tools/init.bash в целевой директории)
+PROXY_CLIENT_SETUP_INIT_PATH="${PROXY_CLIENT_SETUP_INIT_PATH:-${PROXY_CLIENT_SETUP_TARGET_DIR}/tools/init.bash}"
+
+# Release version (empty → latest)
+PROXY_CLIENT_SETUP_VERSION="${PROXY_CLIENT_SETUP_VERSION:-}"
+
+# Tmp directory for archive extraction (content goes directly here)
+PROXY_CLIENT_SETUP_TMP_DIR="${PROXY_CLIENT_SETUP_TMP_DIR:-$(mktemp -d)}"
+
+# Release asset name (GitHub release file)
+PROXY_CLIENT_SETUP_ARCHIVE_NAME="${PROXY_CLIENT_SETUP_ARCHIVE_NAME:-docker-compose-${PROXY_CLIENT_SETUP_APP_NAME}.tar.gz}"
+
+# Backup root directory
+PROXY_CLIENT_SETUP_BACKUP_ROOT="${PROXY_CLIENT_SETUP_BACKUP_ROOT:-/var/lib/limbo-backup/artefacts/restore-archives}"
+
+# Backup directory (per-run)
+PROXY_CLIENT_SETUP_BACKUP_DIR="${PROXY_CLIENT_SETUP_BACKUP_DIR:-${PROXY_CLIENT_SETUP_BACKUP_ROOT}/${PROXY_CLIENT_SETUP_APP_NAME}_$(date +%Y%m%d_%H%M%S)}"
+
+
+###############################################################################
+# START
+###############################################################################
+
+logger::log "Setting up ${PROXY_CLIENT_SETUP_APP_NAME} via docker-compose (release mode)"
+logger::log "Target directory: ${PROXY_CLIENT_SETUP_TARGET_DIR}"
 
 # Require root
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
 
-# Dependencies
-logger::log "Installing dependencies (git, ca-certificates, curl)"
+
+###############################################################################
+# DEPENDENCIES
+###############################################################################
+logger::log "Installing dependencies (ca-certificates, curl, tar, gzip, rsync)"
 apt update || logger::err "apt update failed"
-apt install -y git ca-certificates curl || logger::err "Failed to install required packages"
+apt install -y ca-certificates curl tar gzip rsync || logger::err "Failed to install required packages"
 
-# Prepare target directory
+
+###############################################################################
+# PREPARE TARGET DIRECTORY
+###############################################################################
 logger::log "Ensuring target directory exists: ${PROXY_CLIENT_SETUP_TARGET_DIR}"
-mkdir -p "${PROXY_CLIENT_SETUP_TARGET_DIR}" || logger::err "Failed to create target directory"
-cd "${PROXY_CLIENT_SETUP_TARGET_DIR}" || logger::err "Failed to enter target directory"
+mkdir -p "${PROXY_CLIENT_SETUP_TARGET_DIR}" || logger::err "Cannot create target dir"
+cd "${PROXY_CLIENT_SETUP_TARGET_DIR}" || logger::err "Cannot enter target dir"
 
-# Clone or update repository
-if [ -d ".git" ]; then
-    logger::log "Git repository already present, pulling latest changes"
-    git fetch --all || logger::err "git fetch failed"
-    if [ -n "${PROXY_CLIENT_SETUP_GIT_BRANCH}" ]; then
-        git checkout "${PROXY_CLIENT_SETUP_GIT_BRANCH}" || logger::err "Failed to checkout branch ${PROXY_CLIENT_SETUP_GIT_BRANCH}"
-        git pull --ff-only origin "${PROXY_CLIENT_SETUP_GIT_BRANCH}" || logger::err "git pull failed"
-    else
-        git pull --ff-only || logger::err "git pull failed"
-    fi
+
+###############################################################################
+# DETERMINE RELEASE ASSET URL
+###############################################################################
+if [ -z "${PROXY_CLIENT_SETUP_VERSION}" ]; then
+  # latest release
+  PROXY_CLIENT_SETUP_ARCHIVE_URL="https://github.com/${PROXY_CLIENT_SETUP_GITHUB_REPO}/releases/latest/download/${PROXY_CLIENT_SETUP_ARCHIVE_NAME}"
+  logger::log "Using latest release asset: ${PROXY_CLIENT_SETUP_ARCHIVE_URL}"
 else
-    logger::log "Cloning ${PROXY_CLIENT_SETUP_REPO_URL} into ${PROXY_CLIENT_SETUP_TARGET_DIR}"
-    if [ -n "${PROXY_CLIENT_SETUP_GIT_BRANCH}" ]; then
-        git clone --depth 1 --branch "${PROXY_CLIENT_SETUP_GIT_BRANCH}" "${PROXY_CLIENT_SETUP_REPO_URL}" . || logger::err "git clone failed"
-    else
-        git clone --depth 1 "${PROXY_CLIENT_SETUP_REPO_URL}" . || logger::err "git clone failed"
-    fi
+  # specific tag
+  logger::log "Using user-provided release tag: ${PROXY_CLIENT_SETUP_VERSION}"
+  PROXY_CLIENT_SETUP_ARCHIVE_URL="https://github.com/${PROXY_CLIENT_SETUP_GITHUB_REPO}/releases/download/${PROXY_CLIENT_SETUP_VERSION}/${PROXY_CLIENT_SETUP_ARCHIVE_NAME}"
+  logger::log "Release asset URL: ${PROXY_CLIENT_SETUP_ARCHIVE_URL}"
 fi
 
-# Post-clone/init
+
+###############################################################################
+# DOWNLOAD & EXTRACT RELEASE (DIRECTLY INTO TMP)
+###############################################################################
+logger::log "Downloading and extracting to tmp dir: ${PROXY_CLIENT_SETUP_TMP_DIR}"
+mkdir -p "${PROXY_CLIENT_SETUP_TMP_DIR}" || logger::err "Cannot create tmp dir"
+
+curl -fsSL "${PROXY_CLIENT_SETUP_ARCHIVE_URL}" \
+  | tar -xz -C "${PROXY_CLIENT_SETUP_TMP_DIR}" \
+  || logger::err "Failed to download/extract archive"
+
+
+###############################################################################
+# BACKUP REMOVED/OVERWRITTEN FILES
+###############################################################################
+logger::log "Preparing backup directory: ${PROXY_CLIENT_SETUP_BACKUP_DIR}"
+mkdir -p "${PROXY_CLIENT_SETUP_BACKUP_DIR}" \
+  || logger::err "Failed to create backup directory"
+
+
+###############################################################################
+# SYNC WITH RSYNC (PRESERVE .env & vol)
+###############################################################################
+logger::log "Syncing release → ${PROXY_CLIENT_SETUP_TARGET_DIR}"
+logger::log "Backup of removed/overwritten files → ${PROXY_CLIENT_SETUP_BACKUP_DIR}"
+
+rsync -a \
+  --delete \
+  --backup \
+  --backup-dir="${PROXY_CLIENT_SETUP_BACKUP_DIR}" \
+  --suffix=".bak" \
+  --exclude '.env' \
+  --exclude 'vol' \
+  "${PROXY_CLIENT_SETUP_TMP_DIR}/" "./" \
+  || logger::err "Failed to sync release files"
+
+
+###############################################################################
+# INIT SCRIPT
+###############################################################################
 if [ -x "${PROXY_CLIENT_SETUP_INIT_PATH}" ]; then
-    logger::log "Running init script: ${PROXY_CLIENT_SETUP_INIT_PATH}"
-    "${PROXY_CLIENT_SETUP_INIT_PATH}" || logger::err "Init script failed"
+  logger::log "Running init script (exec): ${PROXY_CLIENT_SETUP_INIT_PATH}"
+  "${PROXY_CLIENT_SETUP_INIT_PATH}" || logger::err "Init script failed"
 elif [ -f "${PROXY_CLIENT_SETUP_INIT_PATH}" ]; then
-    logger::log "Running init script via bash: ${PROXY_CLIENT_SETUP_INIT_PATH}"
-    bash "${PROXY_CLIENT_SETUP_INIT_PATH}" || logger::err "Init script failed"
+  logger::log "Running init script (bash): ${PROXY_CLIENT_SETUP_INIT_PATH}"
+  bash "${PROXY_CLIENT_SETUP_INIT_PATH}" || logger::err "Init script failed"
 else
-    logger::err "Init script not found at ${PROXY_CLIENT_SETUP_INIT_PATH}"
+  logger::err "Init script not found: ${PROXY_CLIENT_SETUP_INIT_PATH}"
 fi
-
-logger::log "proxy-client setup complete"
