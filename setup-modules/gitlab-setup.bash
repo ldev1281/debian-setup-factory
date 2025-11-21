@@ -60,6 +60,7 @@ apt install -y ca-certificates curl tar gzip rsync || logger::err "Failed to ins
 ###############################################################################
 logger::log "Ensuring target directory exists: ${GITLAB_SETUP_TARGET_DIR}"
 mkdir -p "${GITLAB_SETUP_TARGET_DIR}" || logger::err "Cannot create target dir"
+cd "${GITLAB_SETUP_TARGET_DIR}" || logger::err "Cannot enter target dir"
 
 
 ###############################################################################
