@@ -17,17 +17,17 @@ FIREFLY_SETUP_GITHUB_REPO="${FIREFLY_SETUP_GITHUB_REPO:-ldev1281/docker-compose-
 FIREFLY_SETUP_TARGET_PARENT_DIR="${FIREFLY_SETUP_TARGET_PARENT_DIR:-/docker}"
 FIREFLY_SETUP_TARGET_DIR="${FIREFLY_SETUP_TARGET_DIR:-${FIREFLY_SETUP_TARGET_PARENT_DIR}/${FIREFLY_SETUP_APP_NAME}}"
 
+# Init script path (absolute, по умолчанию tools/init.bash в целевой директории)
+FIREFLY_SETUP_INIT_PATH="${FIREFLY_SETUP_INIT_PATH:-${FIREFLY_SETUP_TARGET_DIR}/tools/init.bash}"
+
 # Release version (empty → latest)
 FIREFLY_SETUP_VERSION="${FIREFLY_SETUP_VERSION:-}"
 
-# Init script path
-FIREFLY_SETUP_INIT_PATH="${FIREFLY_SETUP_INIT_PATH:-./tools/init.bash}"
-
-# Tmp directory for archive extraction
+# Tmp directory for archive extraction (content goes directly here)
 FIREFLY_SETUP_TMP_DIR="${FIREFLY_SETUP_TMP_DIR:-$(mktemp -d)}"
 
-# Archive filename inside tmp
-FIREFLY_SETUP_ARCHIVE_FILE="${FIREFLY_SETUP_ARCHIVE_FILE:-${FIREFLY_SETUP_TMP_DIR}/${FIREFLY_SETUP_APP_NAME}-release.tar.gz}"
+# Release asset name (GitHub release file)
+FIREFLY_SETUP_ARCHIVE_NAME="${FIREFLY_SETUP_ARCHIVE_NAME:-docker-compose-${FIREFLY_SETUP_APP_NAME}.tar.gz}"
 
 # Backup root directory
 FIREFLY_SETUP_BACKUP_ROOT="${FIREFLY_SETUP_BACKUP_ROOT:-/var/lib/limbo-backup/artefacts/restore-archives}"
@@ -35,11 +35,13 @@ FIREFLY_SETUP_BACKUP_ROOT="${FIREFLY_SETUP_BACKUP_ROOT:-/var/lib/limbo-backup/ar
 # Backup directory (per-run)
 FIREFLY_SETUP_BACKUP_DIR="${FIREFLY_SETUP_BACKUP_DIR:-${FIREFLY_SETUP_BACKUP_ROOT}/${FIREFLY_SETUP_APP_NAME}_$(date +%Y%m%d_%H%M%S)}"
 
+
 ###############################################################################
 # START
 ###############################################################################
 
 logger::log "Setting up ${FIREFLY_SETUP_APP_NAME} via docker-compose (release mode)"
+logger::log "Target directory: ${FIREFLY_SETUP_TARGET_DIR}"
 
 # Require root
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
@@ -48,9 +50,9 @@ logger::log "Setting up ${FIREFLY_SETUP_APP_NAME} via docker-compose (release mo
 ###############################################################################
 # DEPENDENCIES
 ###############################################################################
-logger::log "Installing dependencies (ca-certificates, curl, tar, gzip, rsync, jq)"
+logger::log "Installing dependencies (ca-certificates, curl, tar, gzip, rsync)"
 apt update || logger::err "apt update failed"
-apt install -y ca-certificates curl tar gzip rsync jq || logger::err "Failed to install required packages"
+apt install -y ca-certificates curl tar gzip rsync || logger::err "Failed to install required packages"
 
 
 ###############################################################################
@@ -62,41 +64,29 @@ cd "${FIREFLY_SETUP_TARGET_DIR}" || logger::err "Cannot enter target dir"
 
 
 ###############################################################################
-# DETERMINE RELEASE VERSION
+# DETERMINE RELEASE ASSET URL
 ###############################################################################
 if [ -z "${FIREFLY_SETUP_VERSION}" ]; then
-  FIREFLY_SETUP_API_URL="https://api.github.com/repos/${FIREFLY_SETUP_GITHUB_REPO}/releases/latest"
-  logger::log "Determining latest release tag from ${FIREFLY_SETUP_API_URL}"
-
-  FIREFLY_SETUP_VERSION="$(
-    curl -fsSL "${FIREFLY_SETUP_API_URL}" | jq -r '.tag_name' 2>/dev/null || echo ""
-  )"
-
-  [ -n "${FIREFLY_SETUP_VERSION}" ] || logger::err "Failed to detect latest tag"
-  logger::log "Latest release tag: ${FIREFLY_SETUP_VERSION}"
+  # latest release
+  FIREFLY_SETUP_ARCHIVE_URL="https://github.com/${FIREFLY_SETUP_GITHUB_REPO}/releases/latest/download/${FIREFLY_SETUP_ARCHIVE_NAME}"
+  logger::log "Using latest release asset: ${FIREFLY_SETUP_ARCHIVE_URL}"
 else
+  # specific tag
   logger::log "Using user-provided release tag: ${FIREFLY_SETUP_VERSION}"
+  FIREFLY_SETUP_ARCHIVE_URL="https://github.com/${FIREFLY_SETUP_GITHUB_REPO}/releases/download/${FIREFLY_SETUP_VERSION}/${FIREFLY_SETUP_ARCHIVE_NAME}"
+  logger::log "Release asset URL: ${FIREFLY_SETUP_ARCHIVE_URL}"
 fi
 
-FIREFLY_SETUP_ARCHIVE_URL="https://github.com/${FIREFLY_SETUP_GITHUB_REPO}/archive/refs/tags/${FIREFLY_SETUP_VERSION}.tar.gz"
-logger::log "Archive URL: ${FIREFLY_SETUP_ARCHIVE_URL}"
-
 
 ###############################################################################
-# DOWNLOAD & EXTRACT RELEASE
+# DOWNLOAD & EXTRACT RELEASE (DIRECTLY INTO TMP)
 ###############################################################################
-logger::log "Downloading: ${FIREFLY_SETUP_ARCHIVE_URL}"
-curl -fsSL "${FIREFLY_SETUP_ARCHIVE_URL}" -o "${FIREFLY_SETUP_ARCHIVE_FILE}" \
-  || logger::err "Failed to download archive"
+logger::log "Downloading and extracting to tmp dir: ${FIREFLY_SETUP_TMP_DIR}"
+mkdir -p "${FIREFLY_SETUP_TMP_DIR}" || logger::err "Cannot create tmp dir"
 
-logger::log "Extracting archive into: ${FIREFLY_SETUP_TMP_DIR}"
-tar -xzf "${FIREFLY_SETUP_ARCHIVE_FILE}" -C "${FIREFLY_SETUP_TMP_DIR}" \
-  || logger::err "Failed to extract archive"
-
-FIREFLY_SETUP_EXTRACTED_SUBDIR="$(find "${FIREFLY_SETUP_TMP_DIR}" -mindepth 1 -maxdepth 1 -type d -print -quit)"
-[ -n "${FIREFLY_SETUP_EXTRACTED_SUBDIR}" ] || logger::err "Extracted directory not found"
-
-logger::log "Extracted directory: ${FIREFLY_SETUP_EXTRACTED_SUBDIR}"
+curl -fsSL "${FIREFLY_SETUP_ARCHIVE_URL}" \
+  | tar -xz -C "${FIREFLY_SETUP_TMP_DIR}" \
+  || logger::err "Failed to download/extract archive"
 
 
 ###############################################################################
@@ -120,7 +110,7 @@ rsync -a \
   --suffix=".bak" \
   --exclude '.env' \
   --exclude 'vol' \
-  "${FIREFLY_SETUP_EXTRACTED_SUBDIR}/" "./" \
+  "${FIREFLY_SETUP_TMP_DIR}/" "./" \
   || logger::err "Failed to sync release files"
 
 
