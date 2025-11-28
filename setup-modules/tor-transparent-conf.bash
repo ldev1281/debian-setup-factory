@@ -26,7 +26,7 @@ TOR_TRANSPARENT_CONF_AUTOMAP_SUFFIXES="${TOR_TRANSPARENT_CONF_AUTOMAP_SUFFIXES:-
 logger::log "Installing dependencies"
 
 apt update || logger::err "apt update failed"
-apt install -y nftables || logger::err "Failed to install required packages"
+apt install -y nftables curl || logger::err "Failed to install required packages"
 
 #
 # Transparent transport tor configuration
