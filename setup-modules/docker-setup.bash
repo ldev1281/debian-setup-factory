@@ -17,7 +17,6 @@ for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do
     apt remove -y $pkg || true
 done
 
-
 #
 # Install required dependencies
 #
@@ -46,7 +45,6 @@ curl -fsSL https://download.docker.com/linux/debian/gpg |
 apt update || logger::err "apt update failed"
 apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin || logger::err "Failed to install Docker packages"
 
-
 #
 # Autorun
 #
@@ -54,6 +52,27 @@ systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable docker || logger::err "Failed to enable docker service"
 systemctl restart docker || logger::err "Failed to start docker service"
+
+#
+# Configure /etc/docker/daemon.json
+#
+logger::log "Configuring /etc/docker/daemon.json"
+
+install -m 0755 -d /etc/docker
+
+{
+    echo '{'
+    echo '  "proxies": {'
+    echo '    "http-proxy": "socks5://127.0.0.1:9050",'
+    echo '    "https-proxy": "socks5://127.0.0.1:9050",'
+    echo '    "no-proxy": "127.0.0.0/8"'
+    echo '  }'
+    echo '}'
+} > /etc/docker/daemon.json
+
+logger::log "daemon.json written"
+
+systemctl restart docker || logger::err "Failed to restart docker after creating daemon.json"
 
 
 #
