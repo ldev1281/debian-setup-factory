@@ -21,6 +21,14 @@ TOR_TRANSPARENT_CONF_AUTOMAP_SUFFIXES="${TOR_TRANSPARENT_CONF_AUTOMAP_SUFFIXES:-
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
 
 #
+# Install required dependencies
+#
+logger::log "Installing dependencies"
+
+apt update || logger::err "apt update failed"
+apt install -y nftables || logger::err "Failed to install required packages"
+
+#
 # Transparent transport tor configuration
 #
 logger::log "Transparent transport tor configuration"
