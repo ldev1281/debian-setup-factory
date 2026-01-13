@@ -19,24 +19,34 @@ You must run **`dev-proxy-setup.bash` first**, then run **`dev-prod-setup.bash`*
 
 Create the following secrets in **Bitwarden Secrets Manager** project **before** running `dev-prod-setup.recipe`:
 
-| Secret Name                          | Required                                 | Description                                                    | Example                                |
-|--------------------------------------|------------------------------------------|---------------------------------------------------------------|---------------------------------------|
-| `proxy-hostname`                     | yes                                      | External proxy hostname (used by client)                      | `proxy.stage.example.com`             |
-| `proxy-socks5h-port`                 | yes                                      | Local SOCKS5h proxy port                                      | `1080`                                |
-| `proxy-frp-port`                     | yes                                      | TCP port for FRP                                              | `7000`                                |
-| `proxy-frp-token`                    | yes                                      | Authentication token for FRP                                  | `random32chars`                       |
-| `app-authentik-hostname`             | yes (if installing Authentik, GitLab)    | Authentik app hostname behind proxy                           | `auth.stage.example.com`              |
-| `app-firefly-hostname`               | yes (if installing Firefly)              | Firefly app hostname behind proxy                             | `firefly.stage.example.com`           |
-| `app-youtrack-hostname`              | yes (if installing YouTrack)             | YouTrack app hostname behind proxy                            | `youtrack.stage.example.com`          |
-| `app-gitlab-hostname`                | yes (if installing GitLab)               | GitLab app hostname behind proxy                              | `gitlab.stage.example.com`            |
-| `app-registry-hostname`              | yes (if installing GitLab)               | Docker Registry hostname behind proxy                         | `registry.stage.example.com`          |
-| `app-gitlab-authentik-client-id`     | yes (if installing GitLab)               | OIDC client ID for GitLab (from Authentik)                    | `gitlab-oidc-client-id`               |
-| `app-gitlab-authentik-client-secret` | yes (if installing GitLab)               | OIDC client secret for GitLab (from Authentik)                | `supersecret123`                      |
-| `app-gitlab-smtp-username`           | yes (if installing GitLab)               | SMTP username for GitLab                                      | `gitlab@stage.example.com`            |
-| `app-gitlab-smtp-password`           | yes (if installing GitLab)               | SMTP password for GitLab                                      | `strong-password`                     |
-| `app-authentik-email-username`       | yes (if installing Authentik)            | SMTP username for Authentik                                   | `authentik@stage.example.com`         |
-| `app-authentik-email-password`       | yes (if installing Authentik)            | SMTP password for Authentik                                   | `another-strong-password`             |
-| `app-authentik-email-from`           | yes (if installing Authentik)            | Default “from” email for Authentik                            | `authentik@stage.example.com`         |
+| Secret Name                                   | Required                                  | Description                                                     | Example                         |
+|-----------------------------------------------|-------------------------------------------|-----------------------------------------------------------------|----------------------------------|
+| `proxy-hostname`                              | yes                                       | External proxy hostname (used by client)                       | `proxy.stage.example.com`       |
+| `proxy-socks5h-port`                          | yes                                       | Local SOCKS5h proxy port                                       | `1080`                          |
+| `proxy-frp-port`                              | yes                                       | TCP port for FRP                                               | `7000`                          |
+| `proxy-frp-token`                             | yes                                       | Authentication token for FRP                                   | `random32chars`                 |
+| `app-authentik-hostname`                      | yes (if installing Authentik, GitLab)     | Authentik app hostname behind proxy                            | `auth.stage.example.com`        |
+| `app-firefly-hostname`                        | yes (if installing Firefly)               | Firefly app hostname behind proxy                              | `firefly.stage.example.com`     |
+| `app-youtrack-hostname`                      | yes (if installing YouTrack)              | YouTrack app hostname behind proxy                             | `youtrack.stage.example.com`    |
+| `app-gitlab-hostname`                         | yes (if installing GitLab)                | GitLab app hostname behind proxy                               | `gitlab.stage.example.com`      |
+| `app-registry-hostname`                       | yes (if installing GitLab)                | Docker Registry hostname behind proxy                          | `registry.stage.example.com`    |
+| `app-gitlab-authentik-client-id`              | yes (if installing GitLab)                | OIDC client ID for GitLab (from Authentik)                     | `gitlab-oidc-client-id`         |
+| `app-gitlab-authentik-client-secret`          | yes (if installing GitLab)                | OIDC client secret for GitLab (from Authentik)                 | `supersecret123`                |
+| `app-gitlab-smtp-username`                    | yes (if installing GitLab)                | SMTP username for GitLab                                       | `gitlab@stage.example.com`      |
+| `app-gitlab-smtp-password`                    | yes (if installing GitLab)                | SMTP password for GitLab                                       | `strong-password`               |
+| `app-authentik-email-username`                | yes (if installing Authentik)             | SMTP username for Authentik                                    | `authentik@stage.example.com`   |
+| `app-authentik-email-password`                | yes (if installing Authentik)             | SMTP password for Authentik                                    | `another-strong-password`       |
+| `app-authentik-email-from`                    | yes (if installing Authentik)             | Default “from” email for Authentik                             | `authentik@stage.example.com`   |
+| `app-gitlab-s3-region`                        | yes (if installing GitLab)                | S3 region for GitLab object storage                            | `ap-southeast-1`                |
+| `app-gitlab-s3-uploads-bucket`                | yes (if installing GitLab)                | S3 bucket for GitLab uploads                                   | `gitlab-uploads`                |
+| `app-gitlab-s3-artifacts-bucket`              | yes (if installing GitLab)                | S3 bucket for GitLab CI artifacts                              | `gitlab-artifacts`              |
+| `app-gitlab-s3-packages-bucket`               | yes (if installing GitLab)                | S3 bucket for GitLab packages                                  | `gitlab-packages`               |
+| `app-gitlab-s3-uploads-access-key`            | yes (if installing GitLab)                | S3 access key for uploads bucket                               | `AKIA...UPLOADS`                |
+| `app-gitlab-s3-uploads-secret-key`            | yes (if installing GitLab)                | S3 secret key for uploads bucket                               | `secretkeyuploads`              |
+| `app-gitlab-s3-artifacts-access-key`          | yes (if installing GitLab)                | S3 access key for artifacts bucket                             | `AKIA...ARTIFACTS`              |
+| `app-gitlab-s3-artifacts-secret-key`          | yes (if installing GitLab)                | S3 secret key for artifacts bucket                             | `secretkeyartifacts`            |
+| `app-gitlab-s3-packages-access-key`           | yes (if installing GitLab)                | S3 access key for packages bucket                              | `AKIA...PACKAGES`               |
+| `app-gitlab-s3-packages-secret-key`           | yes (if installing GitLab)                | S3 secret key for packages bucket                              | `secretkeypackages`             |
 
 > **BWS Access Reminder:**  
 > If you have any questions about access to Bitwarden Secrets Manager (BWS), how to configure Machine Accounts or tokens — see the [Bitwarden Helpers Module documentation](https://github.com/ldev1281/debian-setup-factory/blob/dev/setup-modules/README.md#bitwarden-helpers-module-bitwardenbash).
