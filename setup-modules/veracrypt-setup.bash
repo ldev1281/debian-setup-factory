@@ -14,7 +14,7 @@ VERACRYPT_SETUP_VERSION="${VERACRYPT_SETUP_VERSION:-1.26.20}"
 [ "${EUID:-$(id -u)}" -eq 0 ] || logger::err "Script must be run with root privileges"
 
 #
-# Configuring apt & installing tor
+# Configuring apt & installing veracrypt
 #
 logger::log "Downloading and installing veracrypt packages"
 
@@ -23,11 +23,13 @@ TMP_DIR="/tmp/veracrypt_setup.$$"
 mkdir -p "$TMP_DIR"
 cd "$TMP_DIR" || logger::err "Failed to enter temporary directory"
 
-DEB_URL="https://launchpad.net/veracrypt/trunk/${VERACRYPT_SETUP_VERSION}/+download/veracrypt-console-${VERACRYPT_SETUP_VERSION}-Debian-12-amd64.deb"
-curl -fsSL -o "${TMP_DIR}/veracrypt-console-${VERACRYPT_SETUP_VERSION}-Debian-12-amd64.deb" "$DEB_URL" || logger::err "Failed to download frp archive"
+DEB_FILE="veracrypt-console-${VERACRYPT_SETUP_VERSION}-Debian-12-amd64.deb"
+DEB_URL="https://launchpad.net/veracrypt/trunk/${VERACRYPT_SETUP_VERSION}/+download/${DEB_FILE}"
+
+curl -fsSL -o "${TMP_DIR}/${DEB_FILE}" "$DEB_URL" || logger::err "Failed to download veracrypt package"
 
 apt update || logger::err "apt update failed"
-apt install -y "${TMP_DIR}/veracrypt-console-${VERACRYPT_SETUP_VERSION}-Debian-12-amd64.deb" || logger::err "Failed to install Tor packages"
+apt install -y "${TMP_DIR}/${DEB_FILE}" || logger::err "Failed to install veracrypt package"
 
 #
 # Done!
