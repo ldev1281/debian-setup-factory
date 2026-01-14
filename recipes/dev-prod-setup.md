@@ -41,13 +41,15 @@ Create the following secrets in **Bitwarden Secrets Manager** project **before**
 | `app-gitlab-s3-uploads-bucket`                | yes (if installing GitLab)                | S3 bucket for GitLab uploads                                   | `gitlab-uploads`                |
 | `app-gitlab-s3-artifacts-bucket`              | yes (if installing GitLab)                | S3 bucket for GitLab CI artifacts                              | `gitlab-artifacts`              |
 | `app-gitlab-s3-packages-bucket`               | yes (if installing GitLab)                | S3 bucket for GitLab packages                                  | `gitlab-packages`               |
+| `app-gitlab-s3-lfs-bucket`                    | yes (if installing GitLab)                | S3 bucket for GitLab LFS (Large File Storage)                  | `gitlab-lfs`                    |
 | `app-gitlab-s3-uploads-access-key`            | yes (if installing GitLab)                | S3 access key for uploads bucket                               | `AKIA...UPLOADS`                |
 | `app-gitlab-s3-uploads-secret-key`            | yes (if installing GitLab)                | S3 secret key for uploads bucket                               | `secretkeyuploads`              |
 | `app-gitlab-s3-artifacts-access-key`          | yes (if installing GitLab)                | S3 access key for artifacts bucket                             | `AKIA...ARTIFACTS`              |
 | `app-gitlab-s3-artifacts-secret-key`          | yes (if installing GitLab)                | S3 secret key for artifacts bucket                             | `secretkeyartifacts`            |
 | `app-gitlab-s3-packages-access-key`           | yes (if installing GitLab)                | S3 access key for packages bucket                              | `AKIA...PACKAGES`               |
 | `app-gitlab-s3-packages-secret-key`           | yes (if installing GitLab)                | S3 secret key for packages bucket                              | `secretkeypackages`             |
-
+| `app-gitlab-s3-lfs-access-key`                | yes (if installing GitLab)                | S3 access key for GitLab LFS bucket                            | `AKIA...LFS`                    |
+| `app-gitlab-s3-lfs-secret-key`                | yes (if installing GitLab)                | S3 secret key for GitLab LFS bucket                            | `secretkeylfs`                  |
 > **BWS Access Reminder:**  
 > If you have any questions about access to Bitwarden Secrets Manager (BWS), how to configure Machine Accounts or tokens — see the [Bitwarden Helpers Module documentation](https://github.com/ldev1281/debian-setup-factory/blob/dev/setup-modules/README.md#bitwarden-helpers-module-bitwardenbash).
 
