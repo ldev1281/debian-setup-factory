@@ -39,6 +39,7 @@ export PROXY_CLIENT_CADDY_GITLAB_APP_HOSTNAME="$(bitwarden::get_secret 'app-gitl
 export PROXY_CLIENT_CADDY_REGISTRY_APP_HOSTNAME="$(bitwarden::get_secret 'app-registry-hostname' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-registry-hostname'"
 export PROXY_FRP_PORT="$(bitwarden::get_secret 'proxy-frp-port' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-port'"
 export PROXY_FRP_TOKEN="$(bitwarden::get_secret 'proxy-frp-token' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'proxy-frp-token'"
+export PROXY_CLIENT_S3_REGION="$(bitwarden::get_secret 'app-gitlab-s3-region' "$BWS_PROJECT_ID")" || logger::err "Can't find secret 'app-gitlab-s3-region'"
 @module proxy-client-setup.bash
 
 INSTALL_APPS="${INSTALL_APPS:-authentik firefly youtrack gitlab}"
